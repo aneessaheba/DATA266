@@ -6,7 +6,14 @@
 
 #define TILE 16   // block size: 16x16 threads per block
 
-// each block computes a 16x16 tile of C, each thread computes 1 element
+// Blocks and threads:
+// The grid is made of TILE x TILE (16x16) thread blocks. Each block is
+// responsible for computing one 16x16 tile of the output matrix C.
+// Each individual thread inside a block computes exactly one output
+// element C[row][col]. Threads in the same block share fast on-chip
+// shared memory: they cooperatively load a tile of A and a tile of B,
+// then each thread reuses those TILE values from shared memory instead
+// of re-reading them from slower global memory for every multiply-add.
 __global__ void matmulTiledKernel(const float* A, const float* B, float* C, int N) {
     __shared__ float As[TILE][TILE];   // shared tile of A for this block
     __shared__ float Bs[TILE][TILE];   // shared tile of B for this block

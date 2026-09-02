@@ -1,0 +1,104 @@
+HW1 RUN LOG
+SID4=5330 SEED=5330 HP_ID=2
+Date: 2026-09-01 / 2026-09-02 (Colab, Tesla T4)
+
+
+--- neural_networks.ipynb ---
+
+Personal parameters:
+5330 5330 330 2 0 3
+
+Diabetes CSV load:
+df.shape -> (768, 9)
+
+PyTorch baseline (SEED run):
+pt_base_acc = 0.75
+
+PyTorch HP_ID=2 modified (SEED run):
+pt_mod_acc = 0.75
+
+TensorFlow baseline (SEED run):
+tf_base_acc = 0.7586206793785095
+
+TensorFlow HP_ID=2 modified (SEED run):
+tf_mod_acc = 0.75
+
+Multi-seed summary (SEED, SEED+1, SEED+2):
+model                  acc1      acc2      acc3      mean      std
+pytorch_baseline       0.750000  0.741379  0.732759  0.741379  0.007039
+pytorch_modified       0.750000  0.767241  0.758621  0.758621  0.007039
+tensorflow_baseline    0.758621  0.741379  0.750000  0.750000  0.007039
+tensorflow_modified    0.750000  0.758621  0.732759  0.747126  0.010752
+
+
+
+--- cuda.ipynb ---
+
+nvidia-smi: Tesla T4, Driver 580.82.07, CUDA 13.0
+
+File upload: Saving matmul.cu to matmul.cu
+ls -la matmul.cu: 6410 bytes
+
+nvcc --version: Cuda compilation tools, release 12.8, V12.8.93
+
+Build:
+nvcc -O3 -arch=sm_75 matmul.cu -o matmul
+matmul: 1006552 bytes, executable
+
+./matmul 256
+N=256
+CPU time (ms):            19.770
+GPU kernel time (ms):     0.062
+H2D+D2H transfer (ms):    0.371
+GPU end-to-end (ms):      0.433
+Speedup (CPU / GPU end-to-end): 45.703x
+Max abs error CPU vs GPU: 1.464844e-03
+
+./matmul 1024
+N=1024
+CPU time (ms):            3288.839
+GPU kernel time (ms):     3.502
+H2D+D2H transfer (ms):    4.897
+GPU end-to-end (ms):      8.399
+Speedup (CPU / GPU end-to-end): 391.582x
+Max abs error CPU vs GPU: 1.953125e-03
+
+./matmul 4096
+N=4096
+CPU time (ms):            700001.548
+GPU kernel time (ms):     195.519
+H2D+D2H transfer (ms):    78.519
+GPU end-to-end (ms):      274.038
+Speedup (CPU / GPU end-to-end): 2554.399x
+Max abs error CPU vs GPU: 7.812500e-03
+
+Profiler attempts:
+!nsys profile --stats=true -o matmul_nsys_1024 ./matmul 1024
+  -> /bin/bash: line 1: nsys: command not found (nsys not installed in this Colab image)
+
+!find / -name "ncu" -type f 2>/dev/null
+  -> /usr/local/cuda-12.8/bin/ncu (used this full path since ncu is not on PATH)
+
+!/usr/local/cuda-12.8/bin/ncu --set basic ./matmul 1024
+  -> Nsight Compute profile of matmulTiledKernel, N=1024, Tesla T4 (CC 7.5):
+     Duration: 5.80 ms
+     Memory Throughput: 74.34%
+     Compute (SM) Throughput: 74.34%
+     DRAM Throughput: 10.81%
+     L1/TEX Cache Throughput: 95.27%
+     Achieved Occupancy: 98.68%
+     Theoretical Occupancy: 100%
+     Registers per thread: 39
+     Grid: 4,096 blocks (64x64x1) x Block: 256 threads (16x16x1)
+     (6 repeated launches profiled; all within 98.68-98.72% occupancy and
+     74.34-74.36% throughput of each other -- consistent across passes.)
+
+
+Notes:
+- Timing numbers vary a few percent run to run (normal for wall-clock benchmarks);
+  values above and in METRICS.md/MATRIX.md are one consistent run.
+- The run captured during ncu profiling itself showed GPU kernel time of 1681.849 ms
+  at N=1024 (vs 3.502 ms unprofiled) because ncu's instrumentation adds overhead
+  while collecting hardware counters across its 6 replay passes. The unprofiled
+  cudaEvent time (3.502 ms) is the number reported as this assignment's true kernel
+  time; the profiler run is reported separately for its hardware metrics only.

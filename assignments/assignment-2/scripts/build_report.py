@@ -388,8 +388,7 @@ add_screenshot_placeholder("Notebook cell showing the final summary table across
 
 # ============================================================ AI Use
 h1("4. AI Use")
-p("[TODO: add your own AI use disclosure here, in the same format as "
-  "assignments/assignment-1/AI_USE .md]")
+p("See AI_USE.md.")
 
 doc.save(OUT)
 print("wrote", OUT)

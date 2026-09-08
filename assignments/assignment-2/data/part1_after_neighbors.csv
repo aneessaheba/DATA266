@@ -1,0 +1,16 @@
+word,rank,neighbor,cosine_similarity
+cast,1,supporting,0.5975
+cast,2,ensemble,0.5629
+cast,3,casts,0.5266
+score,1,ennio,0.5714
+score,2,morricone,0.5708
+score,3,scoring,0.5438
+plot,1,story,0.6103
+plot,2,storyline,0.5662
+plot,3,plotline,0.5534
+screen,1,screens,0.5327
+screen,2,onscreen,0.5216
+screen,3,kapadia,0.3945
+review,1,reviews,0.6052
+review,2,comment,0.5809
+review,3,comments,0.5578

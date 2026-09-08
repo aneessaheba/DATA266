@@ -1,0 +1,16 @@
+word,rank,neighbor,cosine_similarity
+cast,1,casts,0.7219
+cast,2,casting,0.7188
+cast,3,Cast,0.6638
+score,1,scoring,0.7197
+score,2,scores,0.6596
+score,3,scored,0.6384
+plot,1,plots,0.7625
+plot,2,Plot,0.6524
+plot,3,plotting,0.6328
+screen,1,screens,0.7729
+screen,2,onscreen,0.6115
+screen,3,LCD_screen,0.5599
+review,1,reviewed,0.663
+review,2,reviewing,0.661
+review,3,reviews,0.638

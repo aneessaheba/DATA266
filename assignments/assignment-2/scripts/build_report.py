@@ -1,7 +1,7 @@
-"""Builds the Assignment 2 Word report with write-up text, real result tables,
-and clearly marked screenshot placeholders for manual insertion."""
+"""Builds the Assignment 2 Word report: bare minimum write up, real result tables,
+screenshot placeholders, no stylistic hyphens, no colored headings/tables."""
 import docx
-from docx.shared import Pt, RGBColor, Inches
+from docx.shared import Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
@@ -9,6 +9,11 @@ from docx.oxml import OxmlElement
 OUT = "/Users/anees/Documents/Coursework/data266-5330/assignments/assignment-2/HW2_Document.docx"
 
 doc = docx.Document()
+
+# remove theme blue from Title / Heading 1 / Heading 2
+for style_name in ("Title", "Heading 1", "Heading 2"):
+    style = doc.styles[style_name]
+    style.font.color.rgb = RGBColor(0, 0, 0)
 
 
 def set_cell_shading(cell, color_hex):
@@ -21,8 +26,7 @@ def set_cell_shading(cell, color_hex):
 
 
 def add_table_borders(table):
-    tbl = table._tbl
-    tblPr = tbl.tblPr
+    tblPr = table._tbl.tblPr
     borders = OxmlElement("w:tblBorders")
     for edge in ("top", "left", "bottom", "right", "insideH", "insideV"):
         el = OxmlElement(f"w:{edge}")
@@ -41,9 +45,10 @@ def add_table(rows, header=True):
         for j, val in enumerate(row):
             cell = table.rows[i].cells[j]
             cell.text = str(val)
-            for p in cell.paragraphs:
-                for r in p.runs:
+            for para in cell.paragraphs:
+                for r in para.runs:
                     r.font.size = Pt(9.5)
+                    r.font.color.rgb = RGBColor(0, 0, 0)
                     if header and i == 0:
                         r.font.bold = True
             if header and i == 0:
@@ -54,8 +59,7 @@ def add_table(rows, header=True):
 
 def add_screenshot_placeholder(description):
     table = doc.add_table(rows=1, cols=1)
-    tbl = table._tbl
-    tblPr = tbl.tblPr
+    tblPr = table._tbl.tblPr
     borders = OxmlElement("w:tblBorders")
     for edge in ("top", "left", "bottom", "right"):
         el = OxmlElement(f"w:{edge}")
@@ -67,10 +71,10 @@ def add_screenshot_placeholder(description):
     tblPr.append(borders)
     cell = table.rows[0].cells[0]
     set_cell_shading(cell, "F2F2F2")
-    cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
     p = cell.paragraphs[0]
-    p.paragraph_format.space_before = Pt(18)
-    p.paragraph_format.space_after = Pt(18)
+    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p.paragraph_format.space_before = Pt(14)
+    p.paragraph_format.space_after = Pt(14)
     run = p.add_run(f"[SCREENSHOT PLACEHOLDER]\n{description}")
     run.italic = True
     run.font.color.rgb = RGBColor(0x66, 0x66, 0x66)
@@ -90,25 +94,34 @@ def p(text):
     doc.add_paragraph(text)
 
 
+def code(text):
+    para = doc.add_paragraph()
+    run = para.add_run(text)
+    run.font.name = "Consolas"
+    run.font.size = Pt(9)
+    doc.add_paragraph()
+
+
+A = "→"  # plain arrow, not a hyphen, used for "before to after" values
+
 # ============================================================ Title
 doc.add_heading("DATA 266 HW2", level=0)
-p("Embedding-based transfer learning on IMDB reviews, a Retrieval-Augmented Generation "
-  "pipeline over 10 movie Wikipedia pages, and five training-time optimization techniques.")
+doc.styles["Title"].font.color.rgb = RGBColor(0, 0, 0)
+p("Embedding transfer learning on IMDB reviews, a Retrieval Augmented Generation pipeline over "
+  "10 movie Wikipedia pages, and five training time optimization techniques.")
 
 # ============================================================ Part 1
-h1("1. Embedding-Based Transfer Learning (IMDB Reviews)")
+h1("1. Embedding Transfer Learning (IMDB Reviews)")
 
 h2("1.1 Setup")
 p("Pretrained model: word2vec-google-news-300 (3,000,000 words, 300 dimensions), loaded with "
-  "gensim's KeyedVectors. Fine-tuning corpus: 15,000 reviews randomly sampled from the IMDB "
-  "Movie Reviews dataset (stanfordnlp/imdb, train + unsupervised splits, 75,000 reviews "
-  "available total), cleaned of HTML line breaks and tokenized with gensim's simple_preprocess. "
-  "A new gensim Word2Vec model (skip-gram, 300 dimensions) was built over the IMDB vocabulary, "
-  "every word shared with the pretrained vocabulary was initialized with its pretrained vector "
-  "(20,040 of 22,723 IMDB-vocab words matched), and training continued for 5 epochs on the IMDB "
-  "corpus.")
+  "gensim. Finetuning data: 15,000 reviews sampled from the IMDB Movie Reviews dataset "
+  "(stanfordnlp/imdb), cleaned of HTML tags and tokenized with gensim simple_preprocess. A new "
+  "gensim Word2Vec model (skip gram, 300 dimensions) was built on the IMDB vocabulary. Words "
+  "shared with the pretrained vocabulary were initialized with their pretrained vectors "
+  "(20,040 of 22,723 words matched), then trained for 5 epochs on the IMDB corpus.")
 
-h2("1.2 Top-3 nearest neighbors before fine-tuning")
+h2("1.2 Top 3 nearest neighbors before finetuning")
 add_table([
     ["Word", "Rank", "Neighbor", "Cosine similarity"],
     ["cast", 1, "casts", 0.7219],
@@ -127,10 +140,10 @@ add_table([
     ["review", 2, "reviewing", 0.6610],
     ["review", 3, "reviews", 0.6380],
 ])
-add_screenshot_placeholder("Notebook cell output showing the pretrained-model neighbor table "
-                            "(Part 1, Section 1.2 of the notebook).")
+add_screenshot_placeholder("Notebook cell showing the pretrained model neighbor table "
+                            "(Part 1, Section 1.2).")
 
-h2("1.3 Top-3 nearest neighbors after fine-tuning")
+h2("1.3 Top 3 nearest neighbors after finetuning")
 add_table([
     ["Word", "Rank", "Neighbor", "Cosine similarity"],
     ["cast", 1, "supporting", 0.5975],
@@ -149,311 +162,234 @@ add_table([
     ["review", 2, "comment", 0.5809],
     ["review", 3, "comments", 0.5578],
 ])
-p("Every target word's neighbors shift toward its domain-specific, film-critique sense after "
-  "fine-tuning: cast toward supporting/ensemble (an ensemble cast of actors), score toward ennio/"
-  "morricone (the film composer Ennio Morricone), plot toward story/storyline (narrative plot, "
-  "not a literal plot of land), and review toward reviews/comment/comments (review-discussion "
-  "context). screen was already film-adjacent pre-fine-tuning and shifts the least in sense.")
-add_screenshot_placeholder("Notebook cell output showing the fine-tuned-model neighbor table, "
-                            "and the fine-tuning training log (IMDB load, tokenization, "
-                            "vector initialization count, training time) (Part 1, Sections "
-                            "1.3-1.4 of the notebook).")
+p("Neighbors shift toward the film sense of each word after finetuning: cast toward supporting "
+  "and ensemble, score toward ennio and morricone (the composer Ennio Morricone), plot toward "
+  "story and storyline, and review toward reviews and comment. screen changes the least since "
+  "it was already film related before finetuning.")
+add_screenshot_placeholder("Notebook cell showing the finetuned model neighbor table and the "
+                            "finetuning training log (Part 1, Sections 1.3 and 1.4).")
 
-h2("1.4 t-SNE visualization of the embedding shift")
-p("Figure 1 projects all 5 words' own vectors (before and after fine-tuning) into 2D with "
-  "t-SNE, connecting each word's before/after position with an arrow. Figure 2 zooms in on "
-  "plot specifically, together with its top-3 neighbors in both spaces.")
-add_screenshot_placeholder("Figure 1 - t-SNE plot of all 5 words' before/after positions "
-                            "(Part 1, Section 1.7 of the notebook).")
-add_screenshot_placeholder("Figure 2 - t-SNE detail plot of 'plot' and its neighbors, before "
-                            "vs after fine-tuning (Part 1, Section 1.7 of the notebook).")
-p("'plot' visibly moves away from its morphological/literal neighbors (plots, plotting, Plot) "
-  "and toward its narrative-sense neighbors (story, storyline, plotline) -- a clean, visual "
-  "confirmation of the domain-adaptation effect.")
+h2("1.4 2D visualization of the embedding shift")
+p("Figure 1 shows all 5 words before and after finetuning in 2D using t SNE. Figure 2 zooms in "
+  "on plot and its top 3 neighbors in both spaces. plot moves away from plots and plotting and "
+  "toward story and storyline.")
+add_screenshot_placeholder("Figure 1, t SNE plot of all 5 words before and after finetuning "
+                            "(Part 1, Section 1.7).")
+add_screenshot_placeholder("Figure 2, t SNE detail plot of plot and its neighbors, before and "
+                            "after finetuning (Part 1, Section 1.7).")
 
-h2("1.5 Per-word vector drift: original vs. fine-tuned")
+h2("1.5 Cosine similarity of each word, original vs finetuned")
 add_table([
-    ["Word", "Cosine similarity (before vs. after)"],
+    ["Word", "Cosine similarity (original vs finetuned)"],
     ["review", 0.5757],
     ["score", 0.6441],
     ["screen", 0.6652],
     ["plot", 0.6738],
     ["cast", 0.6969],
 ])
-p("Most shifted word: review (cosine similarity = 0.5757). In general news text \"review\" "
-  "spans many senses (performance review, code review, review of evidence); IMDB's narrow, "
-  "repetitive \"movie review / reader comment\" usage pulls it hardest away from its pretrained "
-  "position.")
-p("Least shifted word: cast (cosine similarity = 0.6969). \"cast\" already has a strong film/"
-  "theater sense in general English (a movie's cast), so IMDB usage reinforces rather than "
-  "redefines its pretrained meaning.")
-add_screenshot_placeholder("Notebook cell output showing the vector-drift table and the "
-                            "most-shifted / least-shifted print statement (Part 1, Section 1.8 "
-                            "of the notebook).")
+p("Most shifted word: review (cosine similarity 0.5757). review has many general senses "
+  "(performance review, code review) so the narrow IMDB usage pulls it furthest from its "
+  "pretrained position.")
+p("Least shifted word: cast (cosine similarity 0.6969). cast already carries a strong film "
+  "sense in general English, so IMDB usage reinforces rather than changes its meaning.")
+add_screenshot_placeholder("Notebook cell showing the cosine similarity table and the most "
+                            "shifted / least shifted print statement (Part 1, Section 1.8).")
 
 # ============================================================ Part 2
-h1("2. Retrieval-Augmented Generation (RAG) Pipeline")
+h1("2. Retrieval Augmented Generation (RAG) Pipeline")
 
 h2("2.1 Setup")
-p("Corpus: Wikipedia pages for 10 movies (Inception, The Matrix, Titanic (1997), The Godfather, "
-  "Pulp Fiction, Forrest Gump, The Dark Knight, Jurassic Park, The Shawshank Redemption, "
-  "Interstellar), fetched with the wikipedia package and loaded with LangChain's DirectoryLoader "
-  "+ TextLoader. Splitter: LangChain RecursiveCharacterTextSplitter, chunk_size=500, "
-  "chunk_overlap=50, producing 1,970 chunks from the 10 documents. Embeddings: sentence-"
-  "transformers/all-MiniLM-L6-v2 via HuggingFaceEmbeddings. Vector store: FAISS, top-k=3 "
-  "retriever. LLM: Qwen/Qwen2.5-0.5B-Instruct (local, greedy decoding for reproducibility), "
-  "called through transformers.pipeline. The pipeline is built from explicit components -- a "
-  "PromptTemplate, the FAISS retriever, and a direct LLM call -- rather than a single pre-built "
-  "chain such as RetrievalQA.")
-add_screenshot_placeholder("Notebook cell output showing the 10 loaded documents (with char "
-                            "counts) and the chunk count after splitting (Part 2, Sections "
-                            "2.1-2.3 of the notebook).")
+p("Corpus: Wikipedia pages for 10 movies, loaded with LangChain DirectoryLoader and "
+  "TextLoader. Splitter: RecursiveCharacterTextSplitter, chunk size 500, chunk overlap 50, "
+  "giving 1,970 chunks. Embeddings: sentence transformers/all MiniLM L6 v2. Vector store: "
+  "FAISS, retriever returns the top 3 chunks. LLM: Qwen2.5 0.5B Instruct, run locally with "
+  "greedy decoding for reproducible answers. The pipeline uses explicit steps, a prompt "
+  "template, a retriever, and a direct LLM call, instead of one prebuilt chain.")
+add_screenshot_placeholder("Notebook cell showing the 10 loaded documents and the chunk count "
+                            "after splitting (Part 2, Sections 2.1 to 2.3).")
 
-h2("2.2 Five questions, retrieved chunks, and generated answers (original config: 500/50)")
+h2("2.2 Five questions, retrieved chunks, and generated answers (chunk size 500, overlap 50)")
 add_table([
-    ["#", "Question", "Top retrieved chunk (source)", "Generated answer", "Correct?"],
+    ["#", "Question", "Top retrieved chunk source (of 3)", "Generated answer", "Correct"],
     [1, "Who directed Inception and who composed its music?", "Inception.txt",
      "Christopher Nolan directed Inception, while Hans Zimmer composed its music.", "Yes"],
     [2, "What is the profession of Andy Dufresne before he was imprisoned in The Shawshank "
         "Redemption?", "The_Shawshank_Redemption.txt",
-     "Before being imprisoned in The Shawshank Redemption, Andy Dufresne worked as a banker.", "Yes"],
+     "Before being imprisoned in The Shawshank Redemption, Andy Dufresne worked as a banker.",
+     "Yes"],
     [3, "What ship does the film Titanic depict sinking, and in what year did it sink?",
-     "Titanic_1997.txt", "The film Titanic depicts the sinking of the RMS Titanic in 1912.", "Yes"],
+     "Titanic_1997.txt", "The film Titanic depicts the sinking of the RMS Titanic in 1912.",
+     "Yes"],
     [4, "In The Matrix, what is the name of the character played by Keanu Reeves?",
      "The Matrix.txt", "Keanu Reeves as Neo", "Yes"],
     [5, "What dinosaur species famously breaks out of its paddock in Jurassic Park?",
-     "Jurassic_Park.txt", "The famous dinosaur species that famously breaks out of its paddock "
-     "in Jurassic Park is the Velociraptor.", "No (correct answer: Tyrannosaurus rex)"],
+     "Jurassic_Park.txt", "The dinosaur species that breaks out of its paddock in Jurassic "
+     "Park is the Velociraptor.", "No, correct answer is Tyrannosaurus rex"],
 ])
-add_screenshot_placeholder("Notebook cell output showing all 5 questions with their retrieved "
-                            "chunks (top-3, with source filenames) and generated answers, "
-                            "original 500/50 configuration (Part 2, Section 2.5 of the "
-                            "notebook).")
+add_screenshot_placeholder("Notebook cell showing all 5 questions with their top 3 retrieved "
+                            "chunks and generated answers, chunk size 500 overlap 50 "
+                            "(Part 2, Section 2.5).")
 
-h2("2.3 Reconfigured chunk size/overlap (1000/100) for 2 of the 5 questions")
-p("The vector store was rebuilt with chunk_size=1000, chunk_overlap=100 (1,112 chunks instead "
-  "of 1,970), and the Jurassic Park and Titanic questions were re-run.")
+h2("2.3 Changed chunk size and overlap for 2 of the 5 questions")
+p("The vector store was rebuilt with chunk size 1000, chunk overlap 100 (1,112 chunks instead "
+  "of 1,970), and the Jurassic Park and Titanic questions were run again.")
 add_table([
-    ["Question", "Original (500/50)", "Reconfigured (1000/100)"],
+    ["Question", "Original, size 500 overlap 50", "Changed, size 1000 overlap 100"],
     ["Jurassic Park paddock dinosaur",
-     "Top-3 chunks miss the T. rex-escape sentence entirely (title, a dinosaur-list header, and "
-     "an earlier Velociraptor scene retrieved instead) -> LLM answers \"Velociraptor\" (wrong).",
-     "Chunk 1 now contains \"...allows a Tyrannosaurus rex to escape and attack the touring "
-     "group\" -> retrieval fixed, but the LLM still answers \"Dilophosaurus\" (wrong; a "
-     "different dinosaur named two sentences later in the same chunk)."],
-    ["Titanic ship & year",
-     "Chunk 1 contains \"...sinking of RMS Titanic in 1912.\" -> correct answer.",
-     "Same fact still present in chunk 1 -> same correct answer, unaffected by the "
-     "reconfiguration."],
+     "Top 3 chunks miss the Tyrannosaurus rex sentence. An earlier Velociraptor scene is "
+     "retrieved instead. Answer: Velociraptor, wrong.",
+     "The top chunk now contains the Tyrannosaurus rex sentence. Answer: Dilophosaurus, still "
+     "wrong, a different dinosaur named two sentences later in the same chunk."],
+    ["Titanic ship and year",
+     "Top chunk contains the sinking of RMS Titanic in 1912. Answer correct.",
+     "Same fact still in the top chunk. Answer correct, unchanged."],
 ])
-p("Larger chunks improved retrieval for the Jurassic Park question (the relevant fact is now "
-  "present in the top-3), but did not fix the final answer -- the generation step introduced a "
-  "new failure mode once several dinosaur names appeared together in one larger chunk. The "
-  "Titanic question was already retrieval-solid at 500/50 and stayed solid at 1000/100.")
-add_screenshot_placeholder("Notebook cell output showing the rebuilt vector store's chunk "
-                            "count and the re-run retrieved chunks/answers for the Jurassic "
-                            "Park and Titanic questions under the 1000/100 configuration "
-                            "(Part 2, Section 2.6 of the notebook).")
+p("Bigger chunks fixed retrieval for the Jurassic Park question, but the final answer was still "
+  "wrong. The Titanic question was already correct at 500/50 and stayed correct at 1000/100.")
+add_screenshot_placeholder("Notebook cell showing the rebuilt chunk count and the new retrieved "
+                            "chunks and answers for the Jurassic Park and Titanic questions "
+                            "(Part 2, Section 2.6).")
 
-h2("2.4 Manual retrieval-success assessment (original 500/50 configuration)")
+h2("2.4 Retrieval success rate (chunk size 500, overlap 50)")
 add_table([
-    ["Question", "Ground-truth passage", "Found in top-3?", "Rank of first relevant chunk"],
-    ["Inception director & composer",
-     "\"...directed by Christopher Nolan...\" / \"The score for Inception was composed...by "
-     "Hans Zimmer\"", "Yes", 1],
-    ["Andy Dufresne's profession",
-     "\"...banker Andy Dufresne arrives at Shawshank State Prison...\"", "Yes", 1],
-    ["Titanic ship & sinking year",
-     "\"...based on accounts of the sinking of RMS Titanic in 1912.\"", "Yes", 1],
-    ["Matrix character played by Keanu Reeves",
-     "\"Keanu Reeves as Neo: A computer programmer...\"", "Yes", 1],
-    ["Jurassic Park paddock-breakout dinosaur",
-     "\"...allows a Tyrannosaurus rex to escape and attack the touring group.\"", "No", "N/A"],
+    ["Question", "Ground truth passage", "Found in top 3", "Rank of first relevant chunk"],
+    ["Inception director and composer",
+     "directed by Christopher Nolan / score composed by Hans Zimmer", "Yes", 1],
+    ["Andy Dufresne profession", "banker Andy Dufresne arrives at Shawshank State Prison",
+     "Yes", 1],
+    ["Titanic ship and year", "sinking of RMS Titanic in 1912", "Yes", 1],
+    ["Matrix character played by Keanu Reeves", "Keanu Reeves as Neo", "Yes", 1],
+    ["Jurassic Park paddock dinosaur",
+     "allows a Tyrannosaurus rex to escape and attack the touring group", "No", "N/A"],
 ])
-p("Retrieval Success Rate = 4 / 5 = 80%.")
-add_screenshot_placeholder("Notebook cell output showing the manual assessment table and the "
-                            "computed Retrieval Success Rate (Part 2, Section 2.7 of the "
-                            "notebook).")
+p("Retrieval success rate: 4 of 5, 80 percent.")
+add_screenshot_placeholder("Notebook cell showing the retrieval success table and the "
+                            "computed rate (Part 2, Section 2.7).")
 
 h2("2.5 RAG failure analysis")
-p("Failure 1 -- correct chunk not retrieved, LLM hallucinates (Jurassic Park, original "
-  "config, 500/50). The sentence describing the T. rex's paddock escape falls into a chunk "
-  "that never surfaces in the top-3; the retriever instead returns the page title, a bare "
-  "\"List\" section header, and an earlier scene where a Velociraptor kills a park worker. "
-  "Because \"Velociraptor\" is present in the retrieved context (from that unrelated scene) "
-  "while the actual answer is not, the LLM confidently answers \"Velociraptor\" -- the correct "
-  "document was effectively not retrieved, and the model filled the gap with a superficially "
-  "plausible but wrong entity from the context it did receive.")
-p("Failure 2 -- correct context retrieved, but the LLM still answers incorrectly (Jurassic "
-  "Park, reconfigured, 1000/100). After widening the chunk size, the correct sentence about the "
-  "Tyrannosaurus rex is present in the top-1 retrieved chunk. Despite the right fact being "
-  "present, the LLM answers \"Dilophosaurus\" -- a different dinosaur mentioned two sentences "
-  "later in the same chunk (Nedry is killed by \"a venom-spitting Dilophosaurus\"). This is a "
-  "pure generation failure: the small (0.5B parameter) instruction-tuned model had the right "
-  "context but failed to correctly attribute the \"escapes its paddock\" action to the right "
-  "entity once multiple dinosaur names competed within the same passage. It shows that fixing "
-  "retrieval does not guarantee a correct final answer.")
-p("Contributing factor -- ambiguous / overlapping entity names. Both failures share a root "
-  "cause: the Jurassic Park plot passage densely packs multiple named dinosaur species into "
-  "adjacent sentences (Velociraptor, Tyrannosaurus rex, Dilophosaurus, Brachiosaurus). This is a "
-  "specific case of ambiguous-entity confusion -- not movie-title ambiguity, but in-document "
-  "entity crowding that confuses both the retriever's chunk selection and the reader's "
-  "attribution.")
+p("Failure 1: retrieval miss causes a wrong answer. At chunk size 500, the sentence about the "
+  "Tyrannosaurus rex escaping its paddock is not in the top 3 chunks. The retriever returns the "
+  "page title, a list header, and an earlier scene mentioning a Velociraptor. The model answers "
+  "Velociraptor, which is wrong.")
+p("Failure 2: correct context retrieved, wrong answer generated. At chunk size 1000, the "
+  "correct sentence about the Tyrannosaurus rex is in the top chunk. The model still answers "
+  "Dilophosaurus, a different dinosaur named two sentences later in the same chunk. This shows "
+  "that fixing retrieval does not guarantee a correct answer.")
+p("Both failures come from several dinosaur names appearing close together in one passage, "
+  "which confuses both retrieval and generation.")
 
 # ============================================================ Part 3
-h1("3. Training-Time Optimization Techniques")
+h1("3. Training Time Optimization Techniques")
 
-h2("3.1 Shared experimental setup")
-p("Model: an 8-layer Transformer-encoder classifier (d_model=384, 6 heads, feedforward "
-  "dim=1536). Data: a single fixed synthetic batch (batch_size=64, seq_len=256, embed_dim=384, "
-  "random binary labels), generated once with a fixed seed and reused unchanged across every "
-  "experiment. Training: 20 steps per run, repeatedly training on the same fixed batch. "
-  "Hardware: Apple Silicon GPU (Metal / MPS backend); no CUDA GPU was available, so CUDA-"
-  "specific memory APIs (torch.cuda.memory_allocated) were replaced with "
-  "torch.mps.current_allocated_memory(), sampled at the point in each training step where the "
-  "technique's effect would show up (peak activation memory is highest right after the forward "
-  "pass, before backward frees intermediate activations).")
+h2("3.1 Shared setup")
+p("Model: an 8 layer Transformer encoder classifier, 384 dimensions, 6 heads. Data: one fixed "
+  "random batch, batch size 64, sequence length 256, reused for every experiment. Training: 20 "
+  "steps per run on the same batch. Hardware: Apple Silicon GPU, MPS backend, no CUDA "
+  "available. Memory was read with torch.mps.current_allocated_memory(), sampled right after "
+  "the forward pass, since CUDA memory functions are not available on this machine.")
 
-h2("3.2 Tensor Creation: CPU vs. GPU")
-p("Tensor creation snippet:")
-p("x_cpu = torch.randn(64, 256, 384)                      # lives in system RAM, ops run on CPU\n"
-  "x_gpu = torch.randn(64, 256, 384, device=\"mps\")       # created directly on GPU")
+h2("3.2 Tensor creation, CPU vs GPU")
+code('x_cpu = torch.randn(64, 256, 384)                 # CPU tensor\n'
+     'x_gpu = torch.randn(64, 256, 384, device="mps")    # GPU tensor')
 add_table([
-    ["Device", "Time (20 steps)", "Peak memory", "Loss (start -> end)"],
-    ["CPU", "67.63 s", "7783.9 MB (process RSS)", "0.7021 -> 0.6972"],
-    ["MPS (GPU)", "32.82 s", "7078.0 MB (MPS allocator)", "0.7004 -> 0.6858"],
+    ["Device", "Time, 20 steps", "Peak memory", f"Loss, start {A} end"],
+    ["CPU", "67.63 s", "7783.9 MB", f"0.7021 {A} 0.6972"],
+    ["MPS (GPU)", "32.82 s", "7078.0 MB", f"0.7004 {A} 0.6858"],
 ])
-p("MPS speedup over CPU: 2.06x for the identical model, data, batch size, and step count. Final "
-  "loss values match closely, confirming both runs perform the same computation on different "
-  "hardware. Peak-memory figures are not directly comparable across devices here: the CPU number "
-  "is whole-process resident memory, while the MPS number is the PyTorch MPS allocator's "
-  "live-tensor count.")
-add_screenshot_placeholder("Notebook cell output showing the CPU vs MPS timing/memory/loss "
-                            "print statements and the computed speedup (Part 3, Section 1 of "
-                            "the notebook).")
+p("MPS was 2.06 times faster than CPU for the same model, data, and steps. Final loss values "
+  "are close, so both runs did the same computation on different hardware. The two memory "
+  "numbers are not directly comparable: CPU memory is whole process memory, MPS memory is the "
+  "allocator's live tensor count.")
+add_screenshot_placeholder("Notebook cell showing the CPU and MPS time, memory, and loss "
+                            "output, and the computed speedup (Part 3, Section 1).")
 
-h2("3.3 Weight Initialization")
-p("Compared PyTorch's default (Kaiming-uniform) initialization against Xavier/Glorot uniform "
-  "and a degenerate all-zeros baseline, applied to every nn.Linear layer.")
+h2("3.3 Weight initialization")
+code('nn.init.xavier_uniform_(layer.weight)   # Xavier\n'
+     'nn.init.zeros_(layer.weight)             # all zeros baseline')
 add_table([
-    ["Init scheme", "Time (20 steps)", "Peak memory", "Loss (start -> end)"],
-    ["default (Kaiming)", "42.87 s", "7077.4 MB", "0.7004 -> 0.6858"],
-    ["Xavier", "43.19 s", "7079.1 MB", "0.7439 -> 0.7452"],
-    ["zeros", "43.60 s", "7078.1 MB", "0.6931 -> 0.3431"],
+    ["Init scheme", "Time, 20 steps", "Peak memory", f"Loss, start {A} end"],
+    ["default (Kaiming)", "42.87 s", "7077.4 MB", f"0.7004 {A} 0.6858"],
+    ["Xavier", "43.19 s", "7079.1 MB", f"0.7439 {A} 0.7452"],
+    ["zeros", "43.60 s", "7078.1 MB", f"0.6931 {A} 0.3431"],
 ])
-p("Default init starts near ln(2) = 0.693 (expected for a balanced 2-class softmax at "
-  "initialization) and descends smoothly. Xavier starts at a much higher initial loss for this "
-  "architecture (the Transformer layers' own LayerNorm-scaled sublayers interact with Xavier's "
-  "differently-scaled weights) and does not recover within 20 steps -- it plateaus/drifts "
-  "slightly upward instead of decreasing. Zeros-initialized linear layers still manage to "
-  "reduce loss substantially, because the model's residual (\"skip\") connections let gradients "
-  "flow through the untouched input path even when a sublayer's own weights start at exactly "
-  "zero -- residual architectures are comparatively robust to some forms of poor "
-  "initialization, unlike a plain deep MLP with zero-initialized weights, which would never "
-  "break symmetry and would not train at all.")
-add_screenshot_placeholder("Notebook cell output showing the three initialization schemes' "
-                            "time/memory/loss print statements, and the loss-over-steps line "
-                            "plot comparing all three (Part 3, Section 2 of the notebook).")
+p("Default init decreases smoothly. Xavier starts higher and does not recover within 20 steps. "
+  "Zeros still trains because of residual connections, which let gradients skip the zeroed "
+  "layers.")
+add_screenshot_placeholder("Notebook cell showing the three init schemes' time, memory, loss "
+                            "output, and the loss over steps plot (Part 3, Section 2).")
 
-h2("3.4 Activation Checkpointing")
-p("Checkpointing snippet:")
-p("x = layer(x)                                              # normal: activations retained\n"
-  "x = torch.utils.checkpoint.checkpoint(layer, x, use_reentrant=False)  # recomputed in backward")
+h2("3.4 Activation checkpointing")
+code("x = layer(x)                                             # normal\n"
+     "x = torch.utils.checkpoint.checkpoint(layer, x, use_reentrant=False)  # checkpointed")
 add_table([
-    ["Configuration", "Time (20 steps)", "Peak activation memory", "Loss (start -> end)"],
-    ["No checkpointing", "47.68 s", "7078.5 MB", "0.7004 -> 0.6858"],
-    ["With checkpointing", "52.39 s", "357.1 MB", "0.7004 -> 0.6886"],
+    ["Configuration", "Time, 20 steps", "Peak activation memory", f"Loss, start {A} end"],
+    ["No checkpointing", "47.68 s", "7078.5 MB", f"0.7004 {A} 0.6858"],
+    ["With checkpointing", "52.39 s", "357.1 MB", f"0.7004 {A} 0.6886"],
 ])
-p("Peak activation memory is reduced 19.8x, at the cost of a 1.10x increase in wall-clock time "
-  "(every checkpointed layer's forward computation runs a second time during backward). Final "
-  "training loss is essentially unchanged -- checkpointing is purely a memory/compute "
-  "trade-off, not a modeling change.")
-add_screenshot_placeholder("Notebook cell output showing the with/without-checkpointing time, "
-                            "peak-activation-memory, and loss print statements, plus the "
-                            "computed memory-reduction and time-overhead ratios (Part 3, "
-                            "Section 3 of the notebook).")
+p("Checkpointing cuts peak activation memory by about 20 times, at the cost of about 10 "
+  "percent more time, since checkpointed layers are recomputed during backward.")
+add_screenshot_placeholder("Notebook cell showing the with and without checkpointing time, "
+                            "memory, and loss output (Part 3, Section 3).")
 
-h2("3.5 Gradient Accumulation")
-p("Gradient accumulation snippet:")
-p("optimizer.zero_grad()\n"
-  "for micro_x, micro_y in micro_batches:                # 4 micro-batches of size 16 = batch 64\n"
-  "    out = model(micro_x)\n"
-  "    loss = loss_fn(out, micro_y) / len(micro_batches)\n"
-  "    loss.backward()                                    # accumulates into .grad\n"
-  "optimizer.step()                                       # one update for the whole batch")
+h2("3.5 Gradient accumulation")
+code("optimizer.zero_grad()\n"
+     "for micro_x, micro_y in microbatches:      # 4 microbatches of size 16\n"
+     "    out = model(micro_x)\n"
+     "    loss = loss_fn(out, micro_y) / 4\n"
+     "    loss.backward()\n"
+     "optimizer.step()")
 add_table([
-    ["Configuration", "Time (20 steps)", "Peak memory", "Loss (start -> end)"],
-    ["Baseline (batch=64, 1 step)", "37.29 s", "7078.9 MB", "0.7004 -> 0.6858"],
-    ["Gradient accumulation (4x micro-batch=16)", "37.04 s", "1971.2 MB", "0.6989 -> 0.6908"],
+    ["Configuration", "Time, 20 steps", "Peak memory", f"Loss, start {A} end"],
+    ["Baseline, batch 64", "37.29 s", "7078.9 MB", f"0.7004 {A} 0.6858"],
+    ["4 microbatches of 16", "37.04 s", "1971.2 MB", f"0.6989 {A} 0.6908"],
 ])
-p("Splitting the same 64-example batch into 4 micro-batches of 16 reduces peak activation "
-  "memory by roughly 3.6x with essentially the same wall-clock time and a nearly identical loss "
-  "trajectory to the full-batch baseline, confirming that gradient accumulation reproduces "
-  "full-batch training dynamics while trading a small amount of loop overhead for a large "
-  "memory reduction.")
-add_screenshot_placeholder("Notebook cell output showing the baseline vs gradient-accumulation "
-                            "time/memory/loss print statements (Part 3, Section 4 of the "
-                            "notebook).")
+p("Splitting the batch into 4 microbatches of 16 cuts peak memory by about 3.6 times, with "
+  "almost no change in time and a nearly identical loss curve.")
+add_screenshot_placeholder("Notebook cell showing the baseline and gradient accumulation time, "
+                            "memory, and loss output (Part 3, Section 4).")
 
-h2("3.6 Mixed Precision Training")
-p("Mixed precision snippet:")
-p("optimizer.zero_grad()\n"
-  "with torch.autocast(device_type=\"mps\", dtype=torch.float16):\n"
-  "    out = model(x)\n"
-  "    loss = loss_fn(out, y)\n"
-  "loss.backward()\n"
-  "optimizer.step()")
+h2("3.6 Mixed precision training")
+code('with torch.autocast(device_type="mps", dtype=torch.float16):\n'
+     "    out = model(x)\n"
+     "    loss = loss_fn(out, y)\n"
+     "loss.backward()")
 add_table([
-    ["Precision", "Time (20 steps)", "Peak memory", "Loss (start -> end)"],
-    ["fp32 (baseline)", "37.46 s", "7081.1 MB", "0.7004 -> 0.6858"],
-    ["Mixed precision (fp16 autocast)", "35.09 s", "5125.0 MB", "0.7004 -> 0.6853"],
+    ["Precision", "Time, 20 steps", "Peak memory", f"Loss, start {A} end"],
+    ["fp32 (baseline)", "37.46 s", "7081.1 MB", f"0.7004 {A} 0.6858"],
+    ["fp16 autocast", "35.09 s", "5125.0 MB", f"0.7004 {A} 0.6853"],
 ])
-p("fp16 autocast reduces peak memory by about 28% and gives a modest (~6%) speedup on this "
-  "Apple Silicon GPU, with final loss essentially matching the fp32 baseline. MPS's fp16 "
-  "support is comparatively less mature than NVIDIA Tensor Cores under CUDA; on a CUDA GPU, "
-  "mixed precision typically yields a much larger speedup (often 2-3x) because Tensor Cores "
-  "execute fp16 matmuls natively at higher throughput than fp32, whereas Apple's GPU has no "
-  "equivalent dedicated low-precision compute path.")
-add_screenshot_placeholder("Notebook cell output showing the fp32 vs mixed-precision time/"
-                            "memory/loss print statements (Part 3, Section 5 of the notebook).")
+p("fp16 autocast cuts peak memory by about 28 percent and gives a small speed gain here, with "
+  "final loss matching the fp32 baseline. Mixed precision speedups are usually larger on CUDA "
+  "GPUs with tensor cores.")
+add_screenshot_placeholder("Notebook cell showing the fp32 and mixed precision time, memory, "
+                            "and loss output (Part 3, Section 5).")
 
-h2("3.7 Summary across all 5 techniques")
+h2("3.7 Summary")
 add_table([
-    ["Technique", "Config A", "Time A (s)", "Mem A (MB)", "Loss A (final)",
-     "Config B", "Time B (s)", "Mem B (MB)", "Loss B (final)"],
-    ["Tensor creation (GPU vs CPU)", "CPU", 67.63, 7783.9, 0.6972,
-     "MPS", 32.82, 7078.0, 0.6858],
-    ["Weight init: default", "default", 42.87, 7077.4, 0.6858, "-", "-", "-", "-"],
-    ["Weight init: xavier", "xavier", 43.19, 7079.1, 0.7452, "-", "-", "-", "-"],
-    ["Weight init: zeros", "zeros", 43.60, 7078.1, 0.3431, "-", "-", "-", "-"],
-    ["Activation checkpointing", "no checkpointing", 47.68, 7078.5, 0.6858,
-     "with checkpointing", 52.39, 357.1, 0.6886],
-    ["Gradient accumulation", "baseline batch=64", 37.29, 7078.9, 0.6858,
-     "4x micro-batch=16", 37.04, 1971.2, 0.6908],
-    ["Mixed precision", "fp32", 37.46, 7081.1, 0.6858,
-     "fp16 autocast", 35.09, 5125.0, 0.6853],
+    ["Technique", "Config A", "Time A", "Mem A (MB)", "Loss A",
+     "Config B", "Time B", "Mem B (MB)", "Loss B"],
+    ["Tensor creation", "CPU", "67.63 s", 7783.9, 0.6972, "MPS", "32.82 s", 7078.0, 0.6858],
+    ["Weight init default", "default", "42.87 s", 7077.4, 0.6858, "N/A", "N/A", "N/A", "N/A"],
+    ["Weight init xavier", "xavier", "43.19 s", 7079.1, 0.7452, "N/A", "N/A", "N/A", "N/A"],
+    ["Weight init zeros", "zeros", "43.60 s", 7078.1, 0.3431, "N/A", "N/A", "N/A", "N/A"],
+    ["Checkpointing", "no checkpoint", "47.68 s", 7078.5, 0.6858,
+     "checkpoint", "52.39 s", 357.1, 0.6886],
+    ["Gradient accumulation", "batch 64", "37.29 s", 7078.9, 0.6858,
+     "4x16 microbatch", "37.04 s", 1971.2, 0.6908],
+    ["Mixed precision", "fp32", "37.46 s", 7081.1, 0.6858,
+     "fp16", "35.09 s", 5125.0, 0.6853],
 ])
-add_screenshot_placeholder("Notebook cell output showing the final combined pandas summary "
-                            "table across all 5 techniques (Part 3, Summary section of the "
-                            "notebook).")
-
-p("Overall takeaways: tensor creation (CPU vs. GPU) is the foundational choice, since everything "
-  "downstream runs on whichever device the tensors already live on, and it gave the largest "
-  "single speedup of any technique tested. Weight initialization does not change memory or "
-  "speed at all -- it only changes the starting point and shape of the loss curve, and residual "
-  "architectures are forgiving of even pathological (all-zero) initialization in a way plain "
-  "deep feedforward networks would not be. Activation checkpointing and gradient accumulation "
-  "both trade a modest time/complexity cost for a large reduction in peak activation memory "
-  "without changing what the model learns -- they are complementary techniques for fitting "
-  "bigger models/batches into limited GPU memory. Mixed precision reduces memory and gives a "
-  "modest speedup here; on CUDA hardware with Tensor Cores, the speedup is typically much "
-  "larger.")
+p("Tensor placement, CPU vs GPU, gave the largest speedup. Weight init only changes the loss "
+  "curve, not memory or time. Checkpointing and gradient accumulation both trade a small amount "
+  "of time for a large memory saving. Mixed precision gives a smaller memory and speed gain on "
+  "this hardware than it would on a CUDA GPU.")
+add_screenshot_placeholder("Notebook cell showing the final summary table across all 5 "
+                            "techniques (Part 3, Summary section).")
 
 # ============================================================ AI Use
 h1("4. AI Use")
-p("[TODO: fill in your own AI-use disclosure here, in the same format as assignments/"
-  "assignment-1/AI_USE .md -- what you used AI for, one thing it got wrong, and how you "
-  "checked the results yourself.]")
+p("[TODO: add your own AI use disclosure here, in the same format as "
+  "assignments/assignment-1/AI_USE .md]")
 
 doc.save(OUT)
 print("wrote", OUT)

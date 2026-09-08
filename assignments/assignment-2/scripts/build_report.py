@@ -163,9 +163,9 @@ add_table([
     ["review", 3, "reviews", 0.5800],
 ])
 p("Neighbors shift toward the film sense of each word after finetuning: cast toward supporting "
-  "and casted, score toward morricone and ennio (real film composers Ennio Morricone and Max "
-  "Steiner), plot toward story and storyline, and review toward comments and comment. screen "
-  "changes the least since it was already film related before finetuning.")
+  "and casted, score toward morricone, ennio, and steiner (the film composers Ennio Morricone "
+  "and Max Steiner), plot toward story and storyline, and review toward comments and comment. "
+  "screen changes the least since it was already film related before finetuning.")
 add_screenshot_placeholder("Notebook cell showing the finetuned model neighbor table and the "
                             "finetuning training log (Part 1, Sections 1.3 and 1.4).")
 
@@ -293,10 +293,10 @@ code('x_cpu = torch.randn(64, 256, 384)                 # CPU tensor\n'
      'x_gpu = torch.randn(64, 256, 384, device="mps")    # GPU tensor')
 add_table([
     ["Device", "Time, 20 steps", "Peak memory", f"Loss, start {A} end"],
-    ["CPU", "67.63 s", "7783.9 MB", f"0.7021 {A} 0.6972"],
-    ["MPS (GPU)", "32.82 s", "7078.0 MB", f"0.7004 {A} 0.6858"],
+    ["CPU", "55.99 s", "7783.0 MB", f"0.7021 {A} 0.6972"],
+    ["MPS (GPU)", "22.62 s", "7078.0 MB", f"0.7004 {A} 0.6858"],
 ])
-p("MPS was 2.06 times faster than CPU for the same model, data, and steps. Final loss values "
+p("MPS was 2.47 times faster than CPU for the same model, data, and steps. Final loss values "
   "are close, so both runs did the same computation on different hardware. The two memory "
   "numbers are not directly comparable: CPU memory is whole process memory, MPS memory is the "
   "allocator's live tensor count.")
@@ -308,9 +308,9 @@ code('nn.init.xavier_uniform_(layer.weight)   # Xavier\n'
      'nn.init.zeros_(layer.weight)             # all zeros baseline')
 add_table([
     ["Init scheme", "Time, 20 steps", "Peak memory", f"Loss, start {A} end"],
-    ["default (Kaiming)", "42.87 s", "7077.4 MB", f"0.7004 {A} 0.6858"],
-    ["Xavier", "43.19 s", "7079.1 MB", f"0.7439 {A} 0.7452"],
-    ["zeros", "43.60 s", "7078.1 MB", f"0.6931 {A} 0.3431"],
+    ["default (Kaiming)", "22.64 s", "7077.7 MB", f"0.7004 {A} 0.6858"],
+    ["Xavier", "22.61 s", "7078.2 MB", f"0.7439 {A} 0.7452"],
+    ["zeros", "22.58 s", "7078.8 MB", f"0.6931 {A} 0.3431"],
 ])
 p("Default init decreases smoothly. Xavier starts higher and does not recover within 20 steps. "
   "Zeros still trains because of residual connections, which let gradients skip the zeroed "
@@ -323,10 +323,10 @@ code("x = layer(x)                                             # normal\n"
      "x = torch.utils.checkpoint.checkpoint(layer, x, use_reentrant=False)  # checkpointed")
 add_table([
     ["Configuration", "Time, 20 steps", "Peak activation memory", f"Loss, start {A} end"],
-    ["No checkpointing", "47.68 s", "7078.5 MB", f"0.7004 {A} 0.6858"],
-    ["With checkpointing", "52.39 s", "357.1 MB", f"0.7004 {A} 0.6886"],
+    ["No checkpointing", "22.70 s", "7079.4 MB", f"0.7004 {A} 0.6858"],
+    ["With checkpointing", "31.71 s", "359.6 MB", f"0.7004 {A} 0.6886"],
 ])
-p("Checkpointing cuts peak activation memory by about 20 times, at the cost of about 10 "
+p("Checkpointing cuts peak activation memory by about 20 times, at the cost of about 40 "
   "percent more time, since checkpointed layers are recomputed during backward.")
 add_screenshot_placeholder("Notebook cell showing the with and without checkpointing time, "
                             "memory, and loss output (Part 3, Section 3).")
@@ -340,11 +340,11 @@ code("optimizer.zero_grad()\n"
      "optimizer.step()")
 add_table([
     ["Configuration", "Time, 20 steps", "Peak memory", f"Loss, start {A} end"],
-    ["Baseline, batch 64", "37.29 s", "7078.9 MB", f"0.7004 {A} 0.6858"],
-    ["4 microbatches of 16", "37.04 s", "1971.2 MB", f"0.6989 {A} 0.6908"],
+    ["Baseline, batch 64", "24.45 s", "7080.9 MB", f"0.7004 {A} 0.6858"],
+    ["4 microbatches of 16", "26.04 s", "1966.2 MB", f"0.6989 {A} 0.6908"],
 ])
 p("Splitting the batch into 4 microbatches of 16 cuts peak memory by about 3.6 times, with "
-  "almost no change in time and a nearly identical loss curve.")
+  "only a small change in time and a nearly identical loss curve.")
 add_screenshot_placeholder("Notebook cell showing the baseline and gradient accumulation time, "
                             "memory, and loss output (Part 3, Section 4).")
 
@@ -355,8 +355,8 @@ code('with torch.autocast(device_type="mps", dtype=torch.float16):\n'
      "loss.backward()")
 add_table([
     ["Precision", "Time, 20 steps", "Peak memory", f"Loss, start {A} end"],
-    ["fp32 (baseline)", "37.46 s", "7081.1 MB", f"0.7004 {A} 0.6858"],
-    ["fp16 autocast", "35.09 s", "5125.0 MB", f"0.7004 {A} 0.6853"],
+    ["fp32 (baseline)", "26.00 s", "7077.9 MB", f"0.7004 {A} 0.6858"],
+    ["fp16 autocast", "22.97 s", "5123.8 MB", f"0.7004 {A} 0.6853"],
 ])
 p("fp16 autocast cuts peak memory by about 28 percent and gives a small speed gain here, with "
   "final loss matching the fp32 baseline. Mixed precision speedups are usually larger on CUDA "
@@ -368,16 +368,16 @@ h2("3.7 Summary")
 add_table([
     ["Technique", "Config A", "Time A", "Mem A (MB)", "Loss A",
      "Config B", "Time B", "Mem B (MB)", "Loss B"],
-    ["Tensor creation", "CPU", "67.63 s", 7783.9, 0.6972, "MPS", "32.82 s", 7078.0, 0.6858],
-    ["Weight init default", "default", "42.87 s", 7077.4, 0.6858, "N/A", "N/A", "N/A", "N/A"],
-    ["Weight init xavier", "xavier", "43.19 s", 7079.1, 0.7452, "N/A", "N/A", "N/A", "N/A"],
-    ["Weight init zeros", "zeros", "43.60 s", 7078.1, 0.3431, "N/A", "N/A", "N/A", "N/A"],
-    ["Checkpointing", "no checkpoint", "47.68 s", 7078.5, 0.6858,
-     "checkpoint", "52.39 s", 357.1, 0.6886],
-    ["Gradient accumulation", "batch 64", "37.29 s", 7078.9, 0.6858,
-     "4x16 microbatch", "37.04 s", 1971.2, 0.6908],
-    ["Mixed precision", "fp32", "37.46 s", 7081.1, 0.6858,
-     "fp16", "35.09 s", 5125.0, 0.6853],
+    ["Tensor creation", "CPU", "55.99 s", 7783.0, 0.6972, "MPS", "22.62 s", 7078.0, 0.6858],
+    ["Weight init default", "default", "22.64 s", 7077.7, 0.6858, "N/A", "N/A", "N/A", "N/A"],
+    ["Weight init xavier", "xavier", "22.61 s", 7078.2, 0.7452, "N/A", "N/A", "N/A", "N/A"],
+    ["Weight init zeros", "zeros", "22.58 s", 7078.8, 0.3431, "N/A", "N/A", "N/A", "N/A"],
+    ["Checkpointing", "no checkpoint", "22.70 s", 7079.4, 0.6858,
+     "checkpoint", "31.71 s", 359.6, 0.6886],
+    ["Gradient accumulation", "batch 64", "24.45 s", 7080.9, 0.6858,
+     "4x16 microbatch", "26.04 s", 1966.2, 0.6908],
+    ["Mixed precision", "fp32", "26.00 s", 7077.9, 0.6858,
+     "fp16", "22.97 s", 5123.8, 0.6853],
 ])
 p("Tensor placement, CPU vs GPU, gave the largest speedup. Weight init only changes the loss "
   "curve, not memory or time. Checkpointing and gradient accumulation both trade a small amount "

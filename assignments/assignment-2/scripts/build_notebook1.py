@@ -118,9 +118,14 @@ Note: gensim's built in `KeyedVectors.intersect_word2vec_format()` helper is bro
 NumPy 2.0 and above (`np.fromstring` in binary mode was removed). We get the identical effect
 by copying the pretrained vectors directly into the new model's vector matrix for every word
 that exists in both vocabularies, before training.
+
+We use `workers=1` (single threaded training) rather than the usual multi worker setup. With
+more than one worker, gensim's training order depends on OS thread scheduling, so the exact
+same seed can still produce slightly different vectors on every run. Single threaded training
+makes the results below fully reproducible.
 """)
 
-code("""model = Word2Vec(vector_size=300, window=5, min_count=5, workers=4, sg=1)
+code("""model = Word2Vec(vector_size=300, window=5, min_count=5, workers=1, seed=42, sg=1)
 model.build_vocab(sentences)
 total_examples = model.corpus_count
 
@@ -158,11 +163,13 @@ comparison
 md("""**Observations.** After finetuning on movie reviews, every target word's neighbors shift
 toward its domain specific, film critique sense:
 
-* `cast` moves toward `supporting`, `ensemble` (an ensemble or supporting cast of actors)
-* `score` moves toward `ennio`, `morricone` (the famous film composer Ennio Morricone)
-* `plot` moves toward `story`, `storyline` (narrative plot, not a literal plot of land)
+* `cast` moves toward `supporting`, `casted` (a supporting cast, actors who were cast)
+* `score` moves toward `morricone`, `ennio`, `steiner` (real film composers Ennio Morricone
+  and Max Steiner)
+* `plot` moves toward `story`, `storyline`, `plotline` (narrative plot, not a literal plot of
+  land)
 * `screen` stays close to `screens`/`onscreen` (already film adjacent even before finetuning)
-* `review` moves toward `reviews`, `comment`, `comments` (review discussion context)
+* `review` moves toward `comments`, `comment`, `reviews` (review discussion context)
 
 This is the expected effect of transfer learning: the general purpose semantics get
 specialized to the target domain's usage patterns.

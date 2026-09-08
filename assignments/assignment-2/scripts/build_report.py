@@ -146,26 +146,26 @@ add_screenshot_placeholder("Notebook cell showing the pretrained model neighbor 
 h2("1.3 Top 3 nearest neighbors after finetuning")
 add_table([
     ["Word", "Rank", "Neighbor", "Cosine similarity"],
-    ["cast", 1, "supporting", 0.5975],
-    ["cast", 2, "ensemble", 0.5629],
-    ["cast", 3, "casts", 0.5266],
-    ["score", 1, "ennio", 0.5714],
-    ["score", 2, "morricone", 0.5708],
-    ["score", 3, "scoring", 0.5438],
-    ["plot", 1, "story", 0.6103],
-    ["plot", 2, "storyline", 0.5662],
-    ["plot", 3, "plotline", 0.5534],
-    ["screen", 1, "screens", 0.5327],
-    ["screen", 2, "onscreen", 0.5216],
-    ["screen", 3, "kapadia", 0.3945],
-    ["review", 1, "reviews", 0.6052],
-    ["review", 2, "comment", 0.5809],
-    ["review", 3, "comments", 0.5578],
+    ["cast", 1, "supporting", 0.5877],
+    ["cast", 2, "casts", 0.5256],
+    ["cast", 3, "casted", 0.5176],
+    ["score", 1, "morricone", 0.6255],
+    ["score", 2, "ennio", 0.6236],
+    ["score", 3, "steiner", 0.5729],
+    ["plot", 1, "story", 0.6344],
+    ["plot", 2, "storyline", 0.6033],
+    ["plot", 3, "plotline", 0.5834],
+    ["screen", 1, "screens", 0.5443],
+    ["screen", 2, "onscreen", 0.5110],
+    ["screen", 3, "dreamkeeper", 0.4186],
+    ["review", 1, "comments", 0.5915],
+    ["review", 2, "comment", 0.5869],
+    ["review", 3, "reviews", 0.5800],
 ])
 p("Neighbors shift toward the film sense of each word after finetuning: cast toward supporting "
-  "and ensemble, score toward ennio and morricone (the composer Ennio Morricone), plot toward "
-  "story and storyline, and review toward reviews and comment. screen changes the least since "
-  "it was already film related before finetuning.")
+  "and casted, score toward morricone and ennio (real film composers Ennio Morricone and Max "
+  "Steiner), plot toward story and storyline, and review toward comments and comment. screen "
+  "changes the least since it was already film related before finetuning.")
 add_screenshot_placeholder("Notebook cell showing the finetuned model neighbor table and the "
                             "finetuning training log (Part 1, Sections 1.3 and 1.4).")
 
@@ -181,16 +181,16 @@ add_screenshot_placeholder("Figure 2, t SNE detail plot of plot and its neighbor
 h2("1.5 Cosine similarity of each word, original vs finetuned")
 add_table([
     ["Word", "Cosine similarity (original vs finetuned)"],
-    ["review", 0.5757],
-    ["score", 0.6441],
-    ["screen", 0.6652],
-    ["plot", 0.6738],
-    ["cast", 0.6969],
+    ["review", 0.5470],
+    ["score", 0.6398],
+    ["plot", 0.6785],
+    ["screen", 0.6835],
+    ["cast", 0.6972],
 ])
-p("Most shifted word: review (cosine similarity 0.5757). review has many general senses "
+p("Most shifted word: review (cosine similarity 0.5470). review has many general senses "
   "(performance review, code review) so the narrow IMDB usage pulls it furthest from its "
   "pretrained position.")
-p("Least shifted word: cast (cosine similarity 0.6969). cast already carries a strong film "
+p("Least shifted word: cast (cosine similarity 0.6972). cast already carries a strong film "
   "sense in general English, so IMDB usage reinforces rather than changes its meaning.")
 add_screenshot_placeholder("Notebook cell showing the cosine similarity table and the most "
                             "shifted / least shifted print statement (Part 1, Section 1.8).")

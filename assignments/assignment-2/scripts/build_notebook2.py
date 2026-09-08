@@ -5,20 +5,20 @@ cells = []
 md = lambda s: cells.append(nbf.v4.new_markdown_cell(s))
 code = lambda s: cells.append(nbf.v4.new_code_cell(s))
 
-md("""# DATA 266 — Training-Time Optimization Techniques
+md("""# DATA 266: Training Time Optimization Techniques
 
-We explore five optimization techniques that can be applied *while training* a neural network,
-and run a controlled experiment for each: **the same model architecture, the same fixed
-synthetic data batch, the same batch size, and the same number of training steps** are used
-throughout, only the technique under test changes. For every run we measure wall-clock
-**execution time**, **peak memory usage**, and the resulting **training loss** trajectory.
+We explore five optimization techniques that can be applied while training a neural network,
+and run a controlled experiment for each: the same model architecture, the same fixed
+synthetic data batch, the same batch size, and the same number of training steps are used
+throughout, only the technique under test changes. For every run we measure execution time,
+peak memory usage, and the resulting training loss trajectory.
 
-**Hardware note:** this machine has an Apple Silicon GPU (Metal / **MPS** backend) and no NVIDIA
-CUDA GPU. Where a technique is normally demonstrated "CPU vs GPU," we use **MPS as the GPU**.
-CUDA has rich memory-profiling APIs (`torch.cuda.memory_allocated`, `max_memory_allocated`); MPS
-exposes only `torch.mps.current_allocated_memory()` (no built-in running peak), so we sample it
+**Hardware note:** this machine has an Apple Silicon GPU (Metal, MPS backend) and no NVIDIA
+CUDA GPU. Where a technique is normally demonstrated as "CPU vs GPU," we use MPS as the GPU.
+CUDA has rich memory profiling APIs (`torch.cuda.memory_allocated`, `max_memory_allocated`); MPS
+exposes only `torch.mps.current_allocated_memory()` (no built in running peak), so we sample it
 manually at the points in the training step where each technique's effect would show up, and
-fall back to the process's peak resident-set size (`resource.getrusage`) on plain CPU runs.
+fall back to the process's peak resident set size (`resource.getrusage`) on plain CPU runs.
 """)
 
 code("""import os, time, platform, warnings, resource
@@ -36,16 +36,16 @@ print("torch", torch.__version__, "| MPS available:", torch.backends.mps.is_avai
 
 md("""## Shared harness: model, data, and measurement utilities
 
-**Model:** a small Transformer-encoder classifier (8 layers, d_model=384, 6 heads) — deep enough
-that activation-memory techniques (checkpointing, gradient accumulation) show a real effect, but
-small enough to train quickly on a laptop GPU.
+**Model:** a small Transformer encoder classifier (8 layers, d_model=384, 6 heads), deep enough
+that activation memory techniques (checkpointing, gradient accumulation) show a real effect,
+but small enough to train quickly on a laptop GPU.
 
-**Data:** a single **fixed** synthetic batch (`batch_size=64`, `seq_len=256`, `embed_dim=384`,
-random binary labels), generated once with a fixed seed and reused, unchanged, by every
-experiment below — this is what "same data" means here: we are isolating the effect of the
+**Data:** a single fixed synthetic batch (`batch_size=64`, `seq_len=256`, `embed_dim=384`,
+random binary labels), generated once with a fixed seed and reused unchanged by every
+experiment below. This is what same data means here: we are isolating the effect of the
 optimization technique itself, not the effect of different training data.
 
-**Training steps:** `N_STEPS = 20` steps per run (repeatedly training on the same fixed batch;
+**Training steps:** `N_STEPS = 20` steps per run (repeatedly training on the same fixed batch,
 enough to see a loss trend without long runtimes).
 """)
 
@@ -59,7 +59,7 @@ N_CLASSES = 2
 
 
 class TinyTransformerClassifier(nn.Module):
-    \"\"\"A small transformer-encoder classifier; use_checkpoint toggles activation checkpointing.\"\"\"
+    \"\"\"A small transformer encoder classifier; use_checkpoint toggles activation checkpointing.\"\"\"
 
     def __init__(self, embed_dim=EMBED_DIM, n_layers=N_LAYERS, n_heads=N_HEADS,
                  n_classes=N_CLASSES, use_checkpoint=False):
@@ -125,10 +125,10 @@ def run_training_loop(model, optimizer, x, y, n_steps, device, loss_fn=None, tra
     \"\"\"Runs n_steps of training on the fixed batch (x, y). Returns
     (elapsed_seconds, peak_activation_mem_mb, list_of_losses).
 
-    peak_activation_mem_mb is sampled right after the forward pass (before backward/optimizer
-    step), which is where activation-memory-saving techniques like checkpointing and gradient
-    accumulation show their effect -- sampling only *after* optimizer.step() converges to the
-    same steady-state figure (params + optimizer state) regardless of technique.\"\"\"
+    peak_activation_mem_mb is sampled right after the forward pass (before backward and the
+    optimizer step), which is where activation memory saving techniques like checkpointing and
+    gradient accumulation show their effect. Sampling only after optimizer.step() converges to
+    the same steady state figure (params plus optimizer state) regardless of technique.\"\"\"
     loss_fn = loss_fn or nn.CrossEntropyLoss()
     reset_memory_stats(device)
     losses = []
@@ -165,13 +165,12 @@ def pick_device(prefer="mps"):
 results_summary = []  # collected across all 5 experiments for the final comparison table
 """)
 
-# ------------------------------------------------------------------ 1. Tensor creation
-md("""---
-## 1. Tensor Creation — CPU vs. GPU
+# ============================================================ 1. Tensor creation
+md("""## 1. Tensor Creation: CPU vs GPU
 
 Where a tensor lives determines which hardware performs every subsequent operation on it.
-Creating tensors directly on the GPU (`.to("mps")` / `.to("cuda")`, or `device=...` at creation
-time) avoids a host→device copy and lets matrix multiplies, attention, etc. run on the
+Creating tensors directly on the GPU (`.to("mps")`, `.to("cuda")`, or `device=...` at creation
+time) avoids a host to device copy and lets matrix multiplies, attention, and so on run on the
 GPU's parallel cores instead of the CPU.
 
 ```python
@@ -209,28 +208,27 @@ results_summary.append({"technique": "Tensor creation: GPU (mps) vs CPU",
                          "mem_B_MB": device_results["mps"]["peak_mem"], "final_loss_B": device_results["mps"]["losses"][-1]})
 """)
 
-md("""**Finding:** the GPU (MPS) run is faster than CPU for identical model/data/steps (final loss
-values match closely, confirming both runs are training the same computation, just on different
-hardware). Peak-memory figures are not directly comparable across devices here: the CPU number is
-whole-process resident memory (`resource.getrusage`), while the MPS number is the PyTorch MPS
-allocator's live-tensor count — a CUDA-equivalent device would let us compare allocator-to-allocator.
+md("""**Finding:** the GPU (MPS) run is faster than CPU for identical model, data, and steps
+(final loss values match closely, confirming both runs are training the same computation, just
+on different hardware). The two peak memory figures are not directly comparable: the CPU number
+is whole process resident memory (`resource.getrusage`), while the MPS number is the PyTorch MPS
+allocator's count of live tensors.
 """)
 
-# ------------------------------------------------------------------ 2. Weight init
-md("""---
-## 2. Weight Initialization
+# ============================================================ 2. Weight init
+md("""## 2. Weight Initialization
 
 How a network's weights are initialized affects the initial loss landscape and how quickly
 gradients start flowing usefully. We compare three schemes on every `nn.Linear` layer:
 
 ```python
-# PyTorch default (kaiming_uniform_) -- do nothing, this is what nn.Linear uses out of the box
+# PyTorch default (kaiming_uniform_): do nothing, this is what nn.Linear uses out of the box
 
 # Xavier/Glorot uniform init
 nn.init.xavier_uniform_(layer.weight)
 nn.init.zeros_(layer.bias)
 
-# Degenerate all-zeros init (included as a pathological baseline)
+# Degenerate all zeros init (included as a pathological baseline)
 nn.init.zeros_(layer.weight)
 nn.init.zeros_(layer.bias)
 ```
@@ -274,37 +272,36 @@ ax.legend(); fig.tight_layout(); plt.show()
 for scheme, r in init_results.items():
     results_summary.append({"technique": f"Weight init: {scheme}",
                              "config_A": scheme, "time_A_s": r["elapsed"], "mem_A_MB": r["peak_mem"],
-                             "final_loss_A": r["losses"][-1], "config_B": "-", "time_B_s": None,
+                             "final_loss_A": r["losses"][-1], "config_B": "N/A", "time_B_s": None,
                              "mem_B_MB": None, "final_loss_B": None})
 """)
 
-md("""**Finding:** the **default** (Kaiming-uniform) init starts near `ln(2) ≈ 0.693` (as expected
-for a balanced 2-class softmax at initialization) and descends smoothly to ~0.686 over 20 steps.
-**Xavier** starts at a *much higher* initial loss for this architecture (Transformer layers
-already contain their own LayerNorm-scaled sublayers, so Xavier's differently-scaled weights
-initially push the classifier head's logits further from balanced) and, unlike the other two
-schemes, does **not** recover within the 20 steps — it plateaus/drifts slightly upward instead of
-decreasing. This is a realistic illustration that a mismatched initialization scheme can leave a
-network stuck in a harder region of the loss landscape, at least on the timescale of a short run;
-it is not automatically "fixed" just because the architecture has other stabilizing components
-like LayerNorm. **Zeros**-initialized linear layers, by contrast, manage to reduce loss
-substantially — because the model has residual ("skip") connections around every transformer
-sublayer, gradients can still flow through the untouched input path even when a sublayer's own
-weights start at exactly zero. This is a good illustration of why residual architectures are
-comparatively robust to *some* forms of poor initialization (symmetry is broken by the residual
-path itself), while remaining sensitive to others (Xavier here being a scale mismatch rather than
-a symmetry problem) — compared to a plain deep MLP with zero-initialized weights, which would
-never break symmetry at all and would not train.
+md("""**Finding:** the default (Kaiming uniform) init starts near `ln(2) is about 0.693` (as
+expected for a balanced 2 class softmax at initialization) and descends smoothly to about 0.686
+over 20 steps. Xavier starts at a much higher initial loss for this architecture (the
+Transformer layers already contain their own LayerNorm scaled sublayers, so Xavier's
+differently scaled weights initially push the classifier head's logits further from balanced),
+and unlike the other two schemes it does not recover within the 20 steps. It plateaus and
+drifts slightly upward instead of decreasing. This is a realistic illustration that a mismatched
+initialization scheme can leave a network stuck in a harder region of the loss landscape, at
+least on the timescale of a short run; it is not automatically fixed just because the
+architecture has other stabilizing components like LayerNorm. Zero initialized linear layers,
+by contrast, manage to reduce loss substantially, because the model has residual (skip)
+connections around every transformer sublayer, so gradients can still flow through the
+untouched input path even when a sublayer's own weights start at exactly zero. This is a good
+illustration of why residual architectures are comparatively robust to some forms of poor
+initialization (symmetry is broken by the residual path itself), while remaining sensitive to
+others (Xavier here being a scale mismatch rather than a symmetry problem). A plain deep MLP
+with zero initialized weights would never break symmetry at all and would not train.
 """)
 
-# ------------------------------------------------------------------ 3. Activation checkpointing
-md("""---
-## 3. Activation Checkpointing
+# ============================================================ 3. Activation checkpointing
+md("""## 3. Activation Checkpointing
 
-Normally, every layer's activations are kept in memory during the forward pass so they're
-available for gradient computation in the backward pass. **Activation checkpointing** discards
-intermediate activations during the forward pass and **recomputes** them on-demand during
-backward — trading extra compute time for a large reduction in peak memory.
+Normally, every layer's activations are kept in memory during the forward pass so they are
+available for gradient computation in the backward pass. Activation checkpointing discards
+intermediate activations during the forward pass and recomputes them on demand during backward,
+trading extra compute time for a large reduction in peak memory.
 
 ```python
 import torch.utils.checkpoint as checkpoint
@@ -312,7 +309,7 @@ import torch.utils.checkpoint as checkpoint
 # normal: activations for every layer output are retained until backward() is called
 x = layer(x)
 
-# checkpointed: only the layer's *input* is retained; its internal activations are
+# checkpointed: only the layer's input is retained; its internal activations are
 # discarded after the forward pass and recomputed during backward()
 x = checkpoint.checkpoint(layer, x, use_reentrant=False)
 ```
@@ -341,28 +338,27 @@ results_summary.append({"technique": "Activation checkpointing",
                          "mem_B_MB": ckpt_results["with_checkpointing"]["peak_mem"], "final_loss_B": ckpt_results["with_checkpointing"]["losses"][-1]})
 """)
 
-md("""**Finding:** activation checkpointing cuts **peak activation memory dramatically** (retained
-activation memory right after the forward pass, before backward frees anything) at the cost of a
-meaningful **increase in wall-clock time**, since every checkpointed layer's forward computation
-is run a second time during backward. Final training loss is essentially unchanged — checkpointing
-is purely a memory/compute trade-off, not a modeling change. This is the classic technique used to
-fit much deeper/larger models than would otherwise fit in GPU memory.
+md("""**Finding:** activation checkpointing cuts peak activation memory dramatically (retained
+activation memory right after the forward pass, before backward frees anything), at the cost of
+a meaningful increase in training time, since every checkpointed layer's forward computation is
+run a second time during backward. Final training loss is essentially unchanged. Checkpointing
+is purely a memory and compute trade off, not a modeling change. This is the classic technique
+used to fit much deeper or larger models than would otherwise fit in GPU memory.
 """)
 
-# ------------------------------------------------------------------ 4. Gradient accumulation
-md("""---
-## 4. Gradient Accumulation
+# ============================================================ 4. Gradient accumulation
+md("""## 4. Gradient Accumulation
 
 Gradient accumulation simulates a larger effective batch size without needing to fit that whole
-batch in memory at once: the batch is split into smaller micro-batches, gradients from each
-micro-batch's `backward()` call are accumulated (summed) into `.grad`, and the optimizer only
-steps once after all micro-batches have contributed.
+batch in memory at once: the batch is split into smaller microbatches, gradients from each
+microbatch's `backward()` call are accumulated (summed) into `.grad`, and the optimizer only
+steps once after all microbatches have contributed.
 
 ```python
 optimizer.zero_grad()
-for micro_x, micro_y in micro_batches:            # e.g. 4 micro-batches of size 16 = batch of 64
+for micro_x, micro_y in microbatches:              # 4 microbatches of size 16 = batch of 64
     out = model(micro_x)
-    loss = loss_fn(out, micro_y) / len(micro_batches)   # scale so the summed grad matches a full-batch grad
+    loss = loss_fn(out, micro_y) / len(microbatches)   # scale so the summed grad matches a full batch grad
     loss.backward()                                # accumulates into .grad, does NOT clear it
 optimizer.step()                                   # one optimizer update for the whole effective batch
 ```
@@ -409,31 +405,30 @@ for name, step_fn in [("baseline_batch64", make_baseline_step()), ("grad_accum_4
     accum_results[name] = dict(elapsed=elapsed, peak_mem=peak_mem, losses=losses)
     print(f"[{name:18s}] time={elapsed:6.2f}s  peak_mem={peak_mem:8.1f}MB  loss {losses[0]:.4f} -> {losses[-1]:.4f}")
 
-results_summary.append({"technique": "Gradient accumulation (4x micro-batch=16 vs full batch=64)",
+results_summary.append({"technique": "Gradient accumulation (4x microbatch=16 vs full batch=64)",
                          "config_A": "baseline batch=64", "time_A_s": accum_results["baseline_batch64"]["elapsed"],
                          "mem_A_MB": accum_results["baseline_batch64"]["peak_mem"], "final_loss_A": accum_results["baseline_batch64"]["losses"][-1],
-                         "config_B": "4x micro-batch=16", "time_B_s": accum_results["grad_accum_4x16"]["elapsed"],
+                         "config_B": "4x microbatch=16", "time_B_s": accum_results["grad_accum_4x16"]["elapsed"],
                          "mem_B_MB": accum_results["grad_accum_4x16"]["peak_mem"], "final_loss_B": accum_results["grad_accum_4x16"]["losses"][-1]})
 """)
 
-md("""**Finding:** splitting the same 64-example batch into 4 micro-batches of 16 reduces peak
-activation memory substantially (each micro-batch only ever holds 1/4 of the full batch's
-activations at once) with essentially the same wall-clock time and a nearly identical loss
-trajectory to the full-batch baseline — confirming that gradient accumulation reproduces
-full-batch training dynamics (same underlying data, same effective batch size) while trading a
-small amount of Python-loop overhead for a large memory reduction. This is the standard way to
-train with an effective batch size larger than what fits on the GPU at once.
+md("""**Finding:** splitting the same 64 example batch into 4 microbatches of 16 reduces peak
+activation memory substantially (each microbatch only ever holds a quarter of the full batch's
+activations at once), with essentially the same training time and a nearly identical loss
+trajectory to the full batch baseline. This confirms that gradient accumulation reproduces full
+batch training dynamics (same underlying data, same effective batch size) while trading a small
+amount of Python loop overhead for a large memory reduction. This is the standard way to train
+with an effective batch size larger than what fits on the GPU at once.
 """)
 
-# ------------------------------------------------------------------ 5. Mixed precision
-md("""---
-## 5. Mixed Precision Training
+# ============================================================ 5. Mixed precision
+md("""## 5. Mixed Precision Training
 
-Mixed precision runs the forward pass (and the parts of backward it drives) in a lower-precision
-dtype (fp16/bf16) instead of fp32, which can roughly halve activation memory and — on hardware
-with dedicated low-precision compute units (e.g. NVIDIA Tensor Cores) — meaningfully speed up
-matrix multiplies, while keeping master weights and the optimizer state in fp32 for numerical
-stability.
+Mixed precision runs the forward pass (and the parts of backward it drives) in a lower
+precision dtype (fp16 or bf16) instead of fp32, which can roughly halve activation memory and,
+on hardware with dedicated low precision compute units such as NVIDIA Tensor Cores,
+meaningfully speed up matrix multiplies, while keeping master weights and the optimizer state
+in fp32 for numerical stability.
 
 ```python
 optimizer.zero_grad()
@@ -444,8 +439,8 @@ loss.backward()
 optimizer.step()
 ```
 
-*(A `torch.cuda.amp.GradScaler` is normally paired with fp16 autocast on CUDA to prevent gradient
-underflow; MPS's autocast path does not require/support `GradScaler`, so we omit it here.)*
+A `torch.cuda.amp.GradScaler` is normally paired with fp16 autocast on CUDA to prevent gradient
+underflow; MPS's autocast path does not require or support `GradScaler`, so we omit it here.
 """)
 
 code("""def fp32_step(model, optimizer, x, y, loss_fn, device_):
@@ -489,17 +484,16 @@ results_summary.append({"technique": "Mixed precision (fp16 autocast vs fp32)",
 """)
 
 md("""**Finding:** fp16 autocast reduces peak memory and gives a modest speedup on this Apple
-Silicon GPU, with a final loss essentially matching the fp32 baseline (confirming mixed precision
-did not harm convergence for this short run). Note that MPS's fp16 support is comparatively less
-mature than NVIDIA Tensor Cores under CUDA — on a CUDA GPU, mixed precision typically yields a much
-larger speedup (often 2-3x) because Tensor Cores execute fp16 matmuls natively at higher
-throughput than fp32, whereas Apple's GPU does not have an equivalent dedicated low-precision
-compute path.
+Silicon GPU, with a final loss essentially matching the fp32 baseline, confirming mixed
+precision did not harm convergence for this short run. MPS's fp16 support is comparatively less
+mature than NVIDIA Tensor Cores under CUDA. On a CUDA GPU, mixed precision typically yields a
+much larger speedup (often 2 to 3 times) because Tensor Cores execute fp16 matmuls natively at
+higher throughput than fp32, whereas Apple's GPU does not have an equivalent dedicated low
+precision compute path.
 """)
 
-# ------------------------------------------------------------------ Summary
-md("""---
-## Summary: all 5 techniques, same model/data/batch/steps
+# ============================================================ Summary
+md("""## Summary: all 5 techniques, same model, data, batch, and steps
 """)
 
 code("""summary_df = pd.DataFrame(results_summary)
@@ -508,17 +502,18 @@ summary_df
 
 md("""### Overall takeaways
 
-- **Tensor creation (CPU vs GPU)** is the foundational choice — everything downstream runs on
+* Tensor creation (CPU vs GPU) is the foundational choice. Everything downstream runs on
   whichever device the tensors already live on, and it gave the largest single speedup of any
   technique tested here.
-- **Weight initialization** doesn't change memory or speed at all — it only changes the *starting
-  point and shape* of the loss curve. Residual architectures are forgiving of even pathological
-  (all-zero) initialization; plain deep feedforward networks would not be.
-- **Activation checkpointing** and **gradient accumulation** both trade a modest time/complexity
-  cost for a large reduction in peak activation memory, without changing what the model learns —
-  they are complementary techniques for fitting bigger models/batches into limited GPU memory.
-- **Mixed precision** reduces memory and gives a modest speedup here; on CUDA hardware with
-  Tensor Cores, the speedup is typically much larger.
+* Weight initialization does not change memory or speed at all. It only changes the starting
+  point and shape of the loss curve. Residual architectures are forgiving of even pathological
+  (all zero) initialization; plain deep feedforward networks would not be.
+* Activation checkpointing and gradient accumulation both trade a modest time and complexity
+  cost for a large reduction in peak activation memory, without changing what the model learns.
+  They are complementary techniques for fitting bigger models and batches into limited GPU
+  memory.
+* Mixed precision reduces memory and gives a modest speedup here; on CUDA hardware with Tensor
+  Cores, the speedup is typically much larger.
 """)
 
 nb["cells"] = cells

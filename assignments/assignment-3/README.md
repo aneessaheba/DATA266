@@ -10,7 +10,7 @@ scratch.
   LangChain against a local llama3.1 8B model served by Ollama. Section 2 implements scaled
   dot product self attention and causal masking from raw PyTorch, with no
   nn.MultiheadAttention, nn.Transformer, or HuggingFace transformer class.
-* `HW3_Document.docx`: the findings write up, matching the notebook's outline.
+* `HW3_Document.pdf`: the findings write up, matching the notebook's outline.
 * `AI_USE.md`: AI use disclosure.
 * `data/`: the two heatmap images produced by the notebook (unmasked and causal self
   attention).

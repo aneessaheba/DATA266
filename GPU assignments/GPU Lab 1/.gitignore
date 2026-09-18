@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Local virtualenvs
+.venv/
+venv/
+env/
+ENV/
+.conda/
+.python-version
+
+# Editor and OS noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# Rehearsal scratch trees, if anyone points rehearse.py --root at the repo by mistake.
+# It defaults to a temp directory and writes nothing here.
+hw25-rehearsal-*/
+
+# Deliberately not ignored, because these are the deliverables and must be committed:
+#   data/*.csv and data/*.json   Part A to E measurements
+#   logs/*.csv                   the Part E thermal log
+#   figures/*.png                every figure
+#   provenance/*.txt             the full nvidia-smi -q captures
+#   RUN_LOG.txt                  the UUID labelled trace behind every cell
+#   METRICS.md, ANALYSIS.md, AI_USE.md, reservations.md
+# Do not add data/, logs/, figures/, provenance/, *.csv, *.png or *.txt above. Those
+# outputs are the assignment and should end up in the hw2-5 tag.

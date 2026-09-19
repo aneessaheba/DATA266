@@ -63,6 +63,53 @@ Other Windows specifics:
 * Stop the machine sleeping or locking during the 20 minute Part E run. A display sleep
   partway through will show up as a clock and power artefact in the thermal log.
 
+## Host memory fallback, and why Part D has to be re run
+
+The first RTX 5090 session reported naive attention succeeding at S=32768, 49152, 50176
+and 50688, with peak memory of 32.13, 72.20, 75.23 and 76.77 GiB on a card that holds
+31.84 GiB. Those are not successes. Latency at those points was 9000 to 10661 ms against
+18 ms at S=16384, where the work only grew about ninefold, which is the signature of
+paging over PCIe rather than computing on the card.
+
+The cause is the host serving allocations out of system memory once VRAM runs out,
+instead of failing. On Windows the NVIDIA WDDM driver does this by default, and machine
+33 logs in as `.\anees` with the work running in a container, so the Windows sysmem
+fallback policy is the prime suspect. `torch.cuda.max_memory_allocated` only reports
+PyTorch's own bookkeeping, so it happily reported 76 GiB and nothing raised.
+
+Two things changed in response:
+
+* `measure()` in `part_d_attention.py` now reads the driver's own figure through
+  `torch.cuda.mem_get_info` and treats any peak above physical VRAM as a failure with
+  `failure_kind=implausible`, not a success. The numbers stay in the CSV so the anomaly
+  is on record. In simulation against this exact fault the search recovers a bracket of
+  32512 to 32768, which matches solving `32*S^2 + 4096*S = 31.84 GiB` for S, about
+  32600. The old code walked to 50688.
+* Part D logs an environment block first: driver VRAM total, free, whether the kernel
+  looks like WSL, and `PYTORCH_CUDA_ALLOC_CONF`. Read it before trusting any memory
+  number.
+
+To turn the fallback off, on the Windows host and not inside the container: NVIDIA
+Control Panel, Manage 3D Settings, then set `CUDA - Sysmem Fallback Policy` to
+`Prefer No Sysmem Fallback`, globally or for the python executable. This needs the host
+desktop, so ask the student assistant in ISB 836 if the account cannot reach it.
+
+Turning it off is not required for a correct result any more, because the cross check
+catches the case either way. It is worth doing anyway, since each oversubscribed probe
+took about ten seconds of paging instead of failing fast.
+
+Re run Part D on its own, no need to repeat the other parts:
+
+```
+python scripts/part_d_attention.py --index 0
+python scripts/make_figures.py
+python scripts/make_metrics.py
+```
+
+Expect the naive bracket to land near S=32600. If it comes back near 50000 again, the
+cross check did not fire, so check the environment block in `RUN_LOG.txt` for a driver
+VRAM total that does not match the card.
+
 ## Before you leave your laptop
 
 * [ ] `python scripts/rehearse.py` runs every Part A to E script against a simulated CUDA

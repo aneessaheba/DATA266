@@ -226,15 +226,22 @@ def figure_e(path):
         ("power.draw", "Power draw (W)", SERIES[3], "{:.0f} W"),
     ]
 
-    # Throttle onset: first sample below 95% of the clock the card held while cold.
+    # Throttle onset: first sample below 95% of the clock the card held while cold,
+    # counted only from the point the load actually started. Sampling begins before the
+    # first matmul lands, and scanning across those idle leading samples reports an
+    # onset of 0 s against an idle clock.
     sm = _floats(rows, "clocks.current.sm")
     onset = None
-    early = sm[t <= 30.0]
+    start = 0
+    if sm.size and not np.isnan(sm).all():
+        busy = np.where(sm >= 0.5 * np.nanmax(sm))[0]
+        start = int(busy[0]) if busy.size else 0
+    early = sm[start:][t[start:] <= t[start] + 30.0] if sm.size else sm
     if early.size and not np.isnan(early).all():
         baseline = np.nanmax(early)
-        below = np.where(sm < 0.95 * baseline)[0]
+        below = np.where(sm[start:] < 0.95 * baseline)[0]
         if below.size:
-            onset = float(t[below[0]])
+            onset = float(t[start:][below[0]])
 
     fig, axes = plt.subplots(len(panels), 1, figsize=(8.6, 10.0), sharex=True)
     for ax, (key, label, color, unit) in zip(axes, panels):

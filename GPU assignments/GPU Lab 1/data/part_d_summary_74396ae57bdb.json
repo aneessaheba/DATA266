@@ -1,0 +1,31 @@
+{
+  "uuid": "GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb",
+  "gpu_name": "NVIDIA GeForce RTX 5090",
+  "config": "batch=1 heads=8 head_dim=64 dtype=fp16 reps=20",
+  "refine_resolution": 256,
+  "max_extend": 131072,
+  "summary": {
+    "naive": {
+      "largest_ok": 32512,
+      "smallest_fail": 32768,
+      "context_died": false,
+      "implausible_probes": 1,
+      "quad_a": 31.999999999999993,
+      "quad_b": 4095.9999999999804,
+      "quad_c": 8519680.000000648,
+      "r2": 1.0,
+      "expected_quad_a": 32
+    },
+    "fused": {
+      "largest_ok": 131072,
+      "smallest_fail": null,
+      "context_died": false,
+      "implausible_probes": 0,
+      "quad_a": 0.033149050673101636,
+      "quad_b": 3413.599864533058,
+      "quad_c": 11449343.999999987,
+      "r2": 0.9973634775150366,
+      "expected_quad_a": 32
+    }
+  }
+}

@@ -1,0 +1,4 @@
+uuid,gpu_name,op,dtype,bytes_moved,flops,median_s,effective_bandwidth_gb_s,spec_bandwidth_gb_s,pct_of_spec_bandwidth,achieved_tflops,arithmetic_intensity_flops_per_byte,ridge_point_flops_per_byte,roofline_side,reps,warmup
+GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb,NVIDIA GeForce RTX 5090,elementwise_add,fp32,3221225472,268435456,2.071312e-03,1555.16,1792.0,86.78,0.13,0.0833,58.48,memory bound,50,10
+GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb,NVIDIA GeForce RTX 5090,device_copy,fp32,2147483648,0,1.430400e-03,1501.32,1792.0,83.78,0.0,0.0,58.48,memory bound,50,10
+GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb,NVIDIA GeForce RTX 5090,matmul_n8192,fp32,805306368,1099511627776,1.670662e-02,48.2,1792.0,2.69,65.813,1365.3333,58.48,compute bound,50,10

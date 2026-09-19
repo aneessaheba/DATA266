@@ -35,8 +35,17 @@ def oom_cell(entry):
         return "not measured"
     ok, fail = entry.get("largest_ok"), entry.get("smallest_fail")
     if fail is None:
-        return f"no OOM up to S={ok} (largest tested)"
-    return f"largest success S={ok}, smallest failure S={fail}"
+        cell = f"no OOM up to S={ok} (largest tested)"
+    else:
+        cell = f"largest success S={ok}, smallest failure S={fail}"
+    # A bracket from a run that died partway through, or one where the host served
+    # allocations from outside VRAM, must not be presented as a clean number.
+    if entry.get("context_died"):
+        cell += ". NOT TRUSTWORTHY, the CUDA context died mid search and the search was aborted. Repeat this run"
+    if entry.get("implausible_probes"):
+        cell += (f". {entry['implausible_probes']} probe(s) exceeded physical VRAM and "
+                 f"were counted as failures, see the implausible rows in the Part D CSV")
+    return cell
 
 
 # nvidia-smi throttle reason bits. GpuIdle and ApplicationsClocksSetting are not
@@ -66,6 +75,30 @@ def decode_reasons(value):
     return [name for bit, name in THROTTLE_BITS if bits & bit]
 
 
+def load_start_index(samples):
+    """Index of the first sample where the sustained load has actually started.
+
+    Part E begins sampling before the first matmul lands, so the leading samples are
+    idle. On the lab run sample zero read 180 MHz at 88 W with 40% utilization. Both the
+    cold baseline and the onset scan have to skip those, otherwise the 95% rule trips
+    against an idle clock and reports a throttle onset of 0 s, which is meaningless.
+    """
+    clocks = [c for _, c, _ in samples]
+    if not clocks:
+        return 0
+    ceiling = max(clocks)
+    for i, (_, clock, row) in enumerate(samples):
+        if clock < 0.5 * ceiling:
+            continue
+        try:
+            if float(row.get("utilization.gpu", "")) < 50.0:
+                continue
+        except (TypeError, ValueError):
+            pass
+        return i
+    return 0
+
+
 def throttle_onset(tag):
     """When the card first throttled, and why.
 
@@ -87,6 +120,14 @@ def throttle_onset(tag):
     if not samples:
         return None, ""
 
+    # Everything below looks only at samples from the moment the load started.
+    start = load_start_index(samples)
+    skipped = samples[:start]
+    samples = samples[start:]
+    if not samples:
+        return None, ""
+    load_t0 = samples[0][0]
+
     reason_onset = reason_note = None
     for elapsed, clock, row in samples:
         names = decode_reasons(row.get("clocks_throttle_reasons.active", ""))
@@ -97,7 +138,7 @@ def throttle_onset(tag):
                            f"{row.get('power.draw', '?')} W, SM clock {clock:.0f} MHz")
             break
 
-    early = [s[1] for s in samples if s[0] <= 30.0]
+    early = [s[1] for s in samples if s[0] <= load_t0 + 30.0]
     baseline = max(early) if early else None
     clock_onset = None
     if baseline:
@@ -106,8 +147,11 @@ def throttle_onset(tag):
                 clock_onset = elapsed
                 break
 
+    ramp = (f". The first {len(skipped)} sample(s), up to {load_t0:.0f} s, were taken "
+            f"before the load ramped and are excluded" if skipped else "")
+
     if reason_onset is not None:
-        note = reason_note
+        note = reason_note + ramp
         if clock_onset is not None:
             note += (f". SM clock first fell below 95% of its cold {baseline:.0f} MHz at "
                      f"{clock_onset:.0f} s")
@@ -116,10 +160,10 @@ def throttle_onset(tag):
         row = next(r for e, c, r in samples if e == clock_onset)
         return clock_onset, (f"no throttle reason bits set, but SM clock fell from a cold "
                              f"{baseline:.0f} MHz to {float(row['clocks.current.sm']):.0f} "
-                             f"MHz at {row.get('temperature.gpu', '?')} C")
+                             f"MHz at {row.get('temperature.gpu', '?')} C" + ramp)
     if baseline:
         return None, (f"no throttle reason bits set and SM clock held at or above 95% of "
-                      f"{baseline:.0f} MHz for the whole run")
+                      f"{baseline:.0f} MHz for the whole run" + ramp)
     return None, ""
 
 

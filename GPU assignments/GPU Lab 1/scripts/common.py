@@ -109,7 +109,69 @@ def is_oom(exc):
     return any(marker in text for marker in (
         "out of memory", "cublas_status_alloc_failed", "cuda error: out of memory",
         "alloc_failed", "cudaerrormemoryallocation",
+        # torch.AcceleratorError is a RuntimeError subclass, so it is already caught by
+        # the handlers. What was missing was recognising this message as a failure to
+        # record rather than a crash to re raise. It surfaced on the lab run straight
+        # after two very large failed allocations. It is not itself an out of memory
+        # condition, so callers must follow it with cuda_context_alive() and stop if the
+        # context did not survive.
+        "device not ready", "cudaerrornotready",
     ))
+
+
+def cuda_context_alive():
+    """Force pending async CUDA errors to surface. False if the context is unusable.
+
+    A failed allocation can leave errors queued that only appear at the next
+    synchronize. Without this check a search would keep probing a dead context and
+    record every later probe as a memory failure, producing a boundary that is an
+    artifact of the crash rather than a measurement.
+    """
+    if torch is None:
+        return False
+    try:
+        torch.cuda.synchronize()
+        return True
+    except Exception:
+        return False
+
+
+def vram_bytes(index=0):
+    """(free, total) physical VRAM as the driver reports it, or (None, None).
+
+    torch.cuda.max_memory_allocated reports the allocator's own bookkeeping. On a setup
+    that silently spills past the card into host memory, that number can exceed what the
+    card physically has, and no exception is raised. The driver figure from
+    torch.cuda.mem_get_info is what a result has to be checked against.
+    """
+    if torch is None:
+        return None, None
+    try:
+        free, total = torch.cuda.mem_get_info(index)
+        return int(free), int(total)
+    except Exception:
+        return None, None
+
+
+def environment_report(index=0):
+    """Facts that decide whether a memory measurement can be believed."""
+    free, total = vram_bytes(index)
+    wsl = "unknown"
+    try:
+        with open("/proc/version") as fh:
+            version = fh.read().lower()
+        wsl = "yes" if ("microsoft" in version or "wsl" in version) else "no"
+    except Exception:
+        pass
+    return {
+        "driver_vram_total_gib": round(total / 2 ** 30, 3) if total else "",
+        "driver_vram_free_gib": round(free / 2 ** 30, 3) if free else "",
+        "nvidia_smi_memory_total_mib": nvidia_smi("memory.total", index),
+        "running_under_wsl": wsl,
+        "PYTORCH_CUDA_ALLOC_CONF": os.environ.get("PYTORCH_CUDA_ALLOC_CONF", "unset"),
+        "CUDA_VISIBLE_DEVICES": os.environ.get("CUDA_VISIBLE_DEVICES", "unset"),
+        "platform": platform.platform(),
+    }
 
 
 def time_cuda(fn, warmup=10, iters=50):

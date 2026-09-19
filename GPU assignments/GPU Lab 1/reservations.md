@@ -25,7 +25,7 @@ machine goes to the next group.
 
 | Day | Check in done | Time | Notes |
 |---|---|---|---|
-| Fri 18 Sep 2026 | | | |
+| Fri 18 Sep 2026 | yes | 12:00 PDT | logged in, ran Parts A through E |
 | Sat 19 Sep 2026 | | | |
 
 ## Hours actually consumed
@@ -36,15 +36,16 @@ point of the question.
 
 | Date | GPU UUID | What was run | Start | End | Hours used | Notes |
 |---|---|---|---|---|---|---|
-| | | Part A provenance | | | | |
-| | | Part B precision sweep | | | | |
-| | | Part C roofline | | | | |
-| | | Part D attention sweep and OOM refine | | | | |
-| | | Part E 20 minute sustained load | | | | |
+| 18 Sep 2026 | GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb | Part A provenance | 21:52 | 21:52 | 0:01 | rerun after PyTorch upgrade |
+| 18 Sep 2026 | GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb | Part B precision sweep | 22:08 | 22:09 | 0:01 | |
+| 18 Sep 2026 | GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb | Part C roofline | 22:10 | 22:10 | 0:01 | |
+| 18 Sep 2026 | GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb | Part D attention sweep and OOM refine | 22:36 | 22:41 | 0:05 | first run had a bug, rerun after fix at 00:46 19 Sep |
+| 18 Sep 2026 | GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb | Part E 20 minute sustained load | 22:42 | 23:02 | 0:20 | |
+| 19 Sep 2026 | GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb | Part D rerun after VRAM overcommit fix | 00:46 | 00:47 | 0:01 | corrected OOM bracket |
 
 **Total reserved:** 23.98 h
 
-**Total consumed:** hh:mm
+**Total consumed:** approximately 0:30
 
 **Difference and why:** the reservation is a whole machine slot, while the measurements
 themselves take about 40 minutes. Record anything that widened the gap, for example a

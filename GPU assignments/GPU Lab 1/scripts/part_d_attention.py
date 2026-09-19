@@ -35,6 +35,7 @@ def measure(seq_len, batch, heads, head_dim, dtype, impl, warmup, iters):
     q = k = v = None
     torch.cuda.empty_cache()
     torch.cuda.reset_peak_memory_stats()
+    _, physical = common.vram_bytes()
     try:
         shape = (batch, heads, seq_len, head_dim)
         q = torch.randn(shape, device="cuda", dtype=dtype)
@@ -44,34 +45,64 @@ def measure(seq_len, batch, heads, head_dim, dtype, impl, warmup, iters):
             mean_s, median_s, std_s, reps = common.time_cuda(
                 lambda: fn(q, k, v), warmup=warmup, iters=iters)
         peak = torch.cuda.max_memory_allocated()
-        return {
+        row = {
             "seq_len": seq_len, "impl": impl, "ok": 1,
             "peak_mem_bytes": peak, "peak_mem_gib": round(peak / 2 ** 30, 4),
             "latency_ms": round(median_s * 1e3, 4), "mean_ms": round(mean_s * 1e3, 4),
             "stdev_ms": round(std_s * 1e3, 4), "reps": reps,
-        }, ""
+            "vram_total_gib": round(physical / 2 ** 30, 3) if physical else "",
+            "failure_kind": "",
+        }
+        # A run that did not raise is not automatically a success. If the allocator says
+        # it peaked above what the card physically holds, the memory came from somewhere
+        # other than VRAM, and this is not the measurement Part D is asking for. Treat
+        # it as a failure so the search keeps looking downward, but keep the numbers in
+        # the row so the anomaly is on record.
+        if physical and peak > physical:
+            row["ok"] = 0
+            row["failure_kind"] = "implausible"
+            return row, (f"implausible, peak {peak / 2 ** 30:.2f} GiB exceeds physical "
+                         f"VRAM {physical / 2 ** 30:.2f} GiB, likely host memory "
+                         f"fallback rather than a real on device allocation")
+        return row, ""
     except RuntimeError as exc:
         if not common.is_oom(exc):
             raise
         message = str(exc).split("\n")[0]
+        # Drain the queue so any async error surfaces now and is attributable to this
+        # probe. If the context does not come back, every later probe would fail for a
+        # reason that has nothing to do with memory.
+        kind = "oom" if common.cuda_context_alive() else "context_dead"
         return {"seq_len": seq_len, "impl": impl, "ok": 0, "peak_mem_bytes": "",
                 "peak_mem_gib": "", "latency_ms": "", "mean_ms": "", "stdev_ms": "",
-                "reps": 0}, message
+                "reps": 0,
+                "vram_total_gib": round(physical / 2 ** 30, 3) if physical else "",
+                "failure_kind": kind}, message
     finally:
         # Drop q, k and v here rather than only on success. After an OOM the partly
         # allocated tensors are still referenced by this frame, and the traceback keeps
         # the frame alive, so without this the bisection leaks the failed probe's VRAM
         # and every later probe fails for the wrong reason.
         del q, k, v
-        torch.cuda.empty_cache()
-        torch.cuda.reset_peak_memory_stats()
+        try:
+            torch.cuda.empty_cache()
+            torch.cuda.reset_peak_memory_stats()
+        except Exception:
+            # A dead context throws here too. Do not let cleanup mask the result.
+            pass
 
 
-def refine_oom(last_ok, first_fail, probe, resolution):
+def refine_oom(last_ok, first_fail, probe, resolution, abort=None):
     """Bisect between the largest success and smallest failure until the bracket is
-    within resolution tokens. Returns (largest_ok, smallest_fail, probes)."""
+    within resolution tokens. Returns (largest_ok, smallest_fail, probes).
+
+    abort is an optional callable. When it returns True the search stops early, which
+    is what happens if the CUDA context dies partway through.
+    """
     probes = 0
     while first_fail - last_ok > resolution:
+        if abort is not None and abort():
+            break
         mid = (last_ok + first_fail) // 2
         if mid in (last_ok, first_fail):
             break
@@ -125,10 +156,16 @@ def main():
               f"dtype={args.dtype} reps={args.iters}")
     common.log_header("PART D the cost of attention", identity, extra=config)
     common.log("D", f"configuration: {config}", identity["uuid"])
+    # Part D is a memory measurement, so record what the driver says the card actually
+    # holds, next to the allocator's own view. A gap between them, or a host that spills
+    # GPU allocations into system RAM, invalidates every peak memory number below.
+    for key, value in common.environment_report(args.index).items():
+        common.log("D", f"environment {key}: {value}", identity["uuid"])
 
     rows, summary = [], {}
     for impl in ("naive", "fused"):
         ok_lengths, fail_lengths = [], []
+        state = {"context_dead": False, "implausible": 0}
         for seq_len in args.seq_lens:
             row, err = measure(seq_len, args.batch, args.heads, args.head_dim, dtype,
                                impl, args.warmup, args.iters)
@@ -143,7 +180,11 @@ def main():
                            identity["uuid"])
             else:
                 fail_lengths.append(seq_len)
-                common.log("D", f"{impl:<5} S={seq_len:>6} OOM. {err}", identity["uuid"])
+                if row.get("failure_kind") == "implausible":
+                    state["implausible"] += 1
+                common.log("D", f"{impl:<5} S={seq_len:>6} failed "
+                                f"({row.get('failure_kind', 'oom')}). {err}",
+                           identity["uuid"])
 
         largest_ok = max(ok_lengths) if ok_lengths else None
         smallest_fail = min(fail_lengths) if fail_lengths else None
@@ -155,8 +196,18 @@ def main():
                        batch=args.batch, heads=args.heads, head_dim=args.head_dim,
                        dtype=args.dtype, phase=phase, warmup=1, note=err)
             rows.append(row)
+            kind = row.get("failure_kind", "")
+            if kind == "implausible":
+                state["implausible"] += 1
+            if kind == "context_dead":
+                state["context_dead"] = True
+                common.log("D", f"{impl}: the CUDA context did not recover from the "
+                                f"failure at S={seq_len}. Aborting the search. Any "
+                                f"bracket reported below is provisional and this run "
+                                f"should be repeated.", identity["uuid"])
             common.log("D", f"{impl:<5} {phase} S={seq_len:>7} "
-                            + ("ok" if row["ok"] else f"OOM. {err}"), identity["uuid"])
+                            + ("ok" if row["ok"] else f"failed ({kind or 'oom'}). {err}"),
+                       identity["uuid"])
             return bool(row["ok"])
 
         # The coarse sweep can finish without a failure: naive attention at B=1 H=8 d=64
@@ -164,7 +215,7 @@ def main():
         # 5090. Part D wants a real boundary, so keep doubling until something fails.
         if smallest_fail is None and largest_ok and not args.no_refine:
             candidate = largest_ok * 2
-            while candidate <= args.max_extend:
+            while candidate <= args.max_extend and not state["context_dead"]:
                 if probe(candidate, phase="extend"):
                     largest_ok = candidate
                     candidate *= 2
@@ -180,14 +231,26 @@ def main():
 
         if smallest_fail and largest_ok and not args.no_refine:
             largest_ok, smallest_fail, probes = refine_oom(
-                largest_ok, smallest_fail, probe, args.refine_resolution)
+                largest_ok, smallest_fail, probe, args.refine_resolution,
+                abort=lambda: state["context_dead"])
             common.log("D", f"{impl}: OOM bracket after {probes} probes. Largest success "
                             f"{largest_ok}, smallest failure {smallest_fail} "
                             f"(resolution {args.refine_resolution} tokens, NOT an exact "
                             f"single token boundary unless resolution is 1)",
                        identity["uuid"])
 
-        summary[impl] = {"largest_ok": largest_ok, "smallest_fail": smallest_fail}
+        summary[impl] = {"largest_ok": largest_ok, "smallest_fail": smallest_fail,
+                         "context_died": state["context_dead"],
+                         "implausible_probes": state["implausible"]}
+        if state["implausible"]:
+            common.log("D", f"{impl}: {state['implausible']} probe(s) reported a peak "
+                            f"above the card's physical VRAM and were counted as "
+                            f"failures, not successes. This host lets allocations spill "
+                            f"out of VRAM, so an unchecked run would have reported a "
+                            f"boundary far above the real one.", identity["uuid"])
+        if state["context_dead"]:
+            common.log("D", f"{impl}: RESULT NOT TRUSTWORTHY, the context died mid "
+                            f"search.", identity["uuid"])
 
         measured = [(r["seq_len"], r["peak_mem_bytes"]) for r in rows
                     if r["impl"] == impl and r["ok"] and r["phase"] == "sweep"]
@@ -229,11 +292,13 @@ def main():
 
     fields = ["uuid", "gpu_name", "impl", "phase", "seq_len", "batch", "heads", "head_dim",
               "dtype", "ok", "peak_mem_bytes", "peak_mem_gib", "latency_ms", "mean_ms",
-              "stdev_ms", "reps", "warmup", "speedup_vs_naive", "peak_mem_ratio_vs_naive",
-              "note"]
+              "stdev_ms", "reps", "warmup", "vram_total_gib", "failure_kind",
+              "speedup_vs_naive", "peak_mem_ratio_vs_naive", "note"]
     for row in rows:
         row.setdefault("speedup_vs_naive", "")
         row.setdefault("peak_mem_ratio_vs_naive", "")
+        row.setdefault("vram_total_gib", "")
+        row.setdefault("failure_kind", "")
     common.write_csv(os.path.join(common.DATA, f"part_d_{identity['uuid'][-12:]}.csv"),
                      rows, fields)
 

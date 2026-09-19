@@ -1,0 +1,231 @@
+PART A provenance | SID4=5330 SEED=5330
+  uuid: GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb
+  gpu_name: NVIDIA GeForce RTX 5090
+  driver_version: 610.60
+  cuda_version: 12.1
+  vram_total_mib: 32607
+  power_limit_w: 575.00
+  torch_version: 2.1.2
+  host: 5c9fd775c569
+
+[2026-09-18T21:52:05] [A] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] full nvidia-smi -q written to provenance/nvidia-smi-q_GeForce_RTX_5090_74396ae57bdb.txt
+[2026-09-18T21:52:05] [A] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] architecture: Blackwell (GB202)
+[2026-09-18T21:52:05] [A] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] memory_type: GDDR7
+[2026-09-18T21:52:05] [A] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] bandwidth_gb_s: 1792.0
+[2026-09-18T21:52:05] [A] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] tensor_core_generation: 5th generation
+[2026-09-18T21:52:05] [A] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] tensor_core_precisions: ['TF32', 'BF16', 'FP16', 'FP8 (E4M3/E5M2)', 'FP6', 'FP4', 'INT8']
+[2026-09-18T21:52:05] [A] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] source: ['NVIDIA RTX Blackwell GPU Architecture Whitepaper v1.1, Appendix A, Table 3, pages 46 to 47. https://images.nvidia.com/aem-dam/Solutions/geforce/blackwell/nvidia-rtx-blackwell-gpu-architecture.pdf', 'Same document, page 15 for memory bandwidth and TGP, page 46 for GB202 SM and CUDA core counts']
+[2026-09-18T21:52:05] [A] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] uuid: GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb
+[2026-09-18T21:52:05] [A] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] driver_version: 610.60
+[2026-09-18T21:52:05] [A] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] cuda_version: 12.1
+[2026-09-18T21:52:05] [A] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] vram_total_mib: 32607
+[2026-09-18T21:52:05] [A] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] power_limit_w: 575.00
+
+PART A provenance | SID4=5330 SEED=5330
+  uuid: GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb
+  gpu_name: NVIDIA GeForce RTX 5090
+  driver_version: 610.60
+  cuda_version: 12.8
+  vram_total_mib: 32607
+  power_limit_w: 575.00
+  torch_version: 2.11.0+cu128
+  host: 5c9fd775c569
+
+[2026-09-18T22:05:44] [A] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] full nvidia-smi -q written to provenance/nvidia-smi-q_GeForce_RTX_5090_74396ae57bdb.txt
+[2026-09-18T22:05:44] [A] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] architecture: Blackwell (GB202)
+[2026-09-18T22:05:44] [A] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] memory_type: GDDR7
+[2026-09-18T22:05:44] [A] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] bandwidth_gb_s: 1792.0
+[2026-09-18T22:05:44] [A] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] tensor_core_generation: 5th generation
+[2026-09-18T22:05:44] [A] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] tensor_core_precisions: ['TF32', 'BF16', 'FP16', 'FP8 (E4M3/E5M2)', 'FP6', 'FP4', 'INT8']
+[2026-09-18T22:05:44] [A] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] source: ['NVIDIA RTX Blackwell GPU Architecture Whitepaper v1.1, Appendix A, Table 3, pages 46 to 47. https://images.nvidia.com/aem-dam/Solutions/geforce/blackwell/nvidia-rtx-blackwell-gpu-architecture.pdf', 'Same document, page 15 for memory bandwidth and TGP, page 46 for GB202 SM and CUDA core counts']
+[2026-09-18T22:05:44] [A] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] uuid: GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb
+[2026-09-18T22:05:44] [A] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] driver_version: 610.60
+[2026-09-18T22:05:44] [A] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] cuda_version: 12.8
+[2026-09-18T22:05:44] [A] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] vram_total_mib: 32607
+[2026-09-18T22:05:44] [A] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] power_limit_w: 575.00
+
+PART B precision and achieved throughput | SID4=5330 SEED=5330
+  uuid: GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb
+  gpu_name: NVIDIA GeForce RTX 5090
+  driver_version: 610.60
+  cuda_version: 12.8
+  vram_total_mib: 32607
+  power_limit_w: 575.00
+  torch_version: 2.11.0+cu128
+  host: 5c9fd775c569
+  warmup=10 timed_reps=50
+
+[2026-09-18T22:08:36] [B] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] N= 1024 fp32    40.27 TFLOPS ( 38.4% of 104.8 peak) median=0.053 ms reps=50 cv=35.96%
+[2026-09-18T22:08:36] [B] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] N= 1024 tf32    26.78 TFLOPS ( 25.6% of 104.8 peak) median=0.080 ms reps=50 cv=23.71%
+[2026-09-18T22:08:36] [B] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] N= 1024 fp16    96.14 TFLOPS ( 45.9% of 209.5 peak) median=0.022 ms reps=50 cv=37.12%
+[2026-09-18T22:08:37] [B] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] N= 1024 bf16    20.28 TFLOPS (  9.7% of 209.5 peak) median=0.106 ms reps=50 cv=21.52%
+[2026-09-18T22:08:37] [B] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] N= 1024 fp8     41.20 TFLOPS (  9.8% of peak)
+[2026-09-18T22:08:37] [B] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] N= 4096 fp32    64.78 TFLOPS ( 61.8% of 104.8 peak) median=2.122 ms reps=50 cv=3.26%
+[2026-09-18T22:08:37] [B] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] N= 4096 tf32   101.69 TFLOPS ( 97.0% of 104.8 peak) median=1.352 ms reps=50 cv=4.95%
+[2026-09-18T22:08:37] [B] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] N= 4096 fp16   209.83 TFLOPS (100.2% of 209.5 peak) median=0.655 ms reps=50 cv=10.13%
+[2026-09-18T22:08:37] [B] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] N= 4096 bf16   179.69 TFLOPS ( 85.8% of 209.5 peak) median=0.765 ms reps=50 cv=11.90%
+[2026-09-18T22:08:37] [B] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] N= 4096 fp8    376.39 TFLOPS ( 89.8% of peak)
+[2026-09-18T22:08:38] [B] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] N= 8192 fp32    64.47 TFLOPS ( 61.5% of 104.8 peak) median=17.054 ms reps=50 cv=1.43%
+[2026-09-18T22:08:39] [B] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] N= 8192 tf32   112.97 TFLOPS (107.8% of 104.8 peak) median=9.732 ms reps=50 cv=0.47%
+[2026-09-18T22:08:39] [B] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] N= 8192 fp16   212.91 TFLOPS (101.6% of 209.5 peak) median=5.164 ms reps=50 cv=1.50%
+[2026-09-18T22:08:39] [B] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] N= 8192 bf16   224.21 TFLOPS (107.0% of 209.5 peak) median=4.904 ms reps=50 cv=1.21%
+[2026-09-18T22:08:40] [B] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] N= 8192 fp8    450.09 TFLOPS (107.4% of peak)
+[2026-09-18T22:08:48] [B] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] N=16384 fp32    65.50 TFLOPS ( 62.5% of 104.8 peak) median=134.282 ms reps=50 cv=0.49%
+[2026-09-18T22:08:52] [B] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] N=16384 tf32   116.25 TFLOPS (110.9% of 104.8 peak) median=75.663 ms reps=50 cv=0.36%
+[2026-09-18T22:08:55] [B] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] N=16384 fp16   214.58 TFLOPS (102.4% of 209.5 peak) median=40.993 ms reps=50 cv=0.63%
+[2026-09-18T22:08:57] [B] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] N=16384 bf16   226.87 TFLOPS (108.3% of 209.5 peak) median=38.772 ms reps=50 cv=1.68%
+[2026-09-18T22:08:58] [B] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] N=16384 fp8    436.71 TFLOPS (104.2% of peak)
+
+PART C bandwidth bound against compute bound | SID4=5330 SEED=5330
+  uuid: GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb
+  gpu_name: NVIDIA GeForce RTX 5090
+  driver_version: 610.60
+  cuda_version: 12.8
+  vram_total_mib: 32607
+  power_limit_w: 575.00
+  torch_version: 2.11.0+cu128
+  host: 5c9fd775c569
+  dtype=fp32 elements=268435456 matmul_n=8192 reps=50
+
+[2026-09-18T22:10:28] [C] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] roofline ridge point = 58.5 FLOPs per byte (104.8 TFLOPS / 1792.0 GB/s)
+[2026-09-18T22:10:30] [C] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] elementwise_add  eff_bw=  1555.2 GB/s ( 86.8% of spec) AI=0.0833 FLOPs per byte, memory bound
+[2026-09-18T22:10:30] [C] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] device_copy      eff_bw=  1501.3 GB/s ( 83.8% of spec) AI=0.0000 FLOPs per byte, memory bound
+[2026-09-18T22:10:30] [C] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] matmul_n8192     eff_bw=    48.2 GB/s (  2.7% of spec) AI=1365.3333 FLOPs per byte, compute bound
+
+PART D the cost of attention | SID4=5330 SEED=5330
+  uuid: GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb
+  gpu_name: NVIDIA GeForce RTX 5090
+  driver_version: 610.60
+  cuda_version: 12.8
+  vram_total_mib: 32607
+  power_limit_w: 575.00
+  torch_version: 2.11.0+cu128
+  host: 5c9fd775c569
+  batch=1 heads=8 head_dim=64 dtype=fp16 reps=20
+
+[2026-09-18T22:11:38] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] configuration: batch=1 heads=8 head_dim=64 dtype=fp16 reps=20
+[2026-09-18T22:11:39] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive S=   512 peak=  0.0177 GiB latency=   0.1612 ms reps=20
+[2026-09-18T22:11:39] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive S=  1024 peak=  0.0431 GiB latency=   0.1204 ms reps=20
+[2026-09-18T22:11:39] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive S=  2048 peak=  0.1407 GiB latency=   0.2903 ms reps=20
+[2026-09-18T22:11:39] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive S=  4096 peak=  0.5236 GiB latency=   1.2444 ms reps=20
+[2026-09-18T22:11:39] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive S=  8192 peak=  2.0392 GiB latency=   4.7237 ms reps=20
+[2026-09-18T22:11:39] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive S= 16384 peak=  8.0704 GiB latency=   18.143 ms reps=20
+[2026-09-18T22:11:42] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive extend S=  32768 ok
+[2026-09-18T22:12:12] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive extend S=  65536 OOM. CUDA out of memory. Tried to allocate 64.00 GiB. GPU 0 has a total capacity of 31.84 GiB of which 0 bytes is free. Of the allocated memory 64.20 GiB is allocated by PyTorch, and 11.88 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+[2026-09-18T22:13:02] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive refine S=  49152 ok
+[2026-09-18T22:13:27] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive refine S=  57344 OOM. CUDA out of memory. Tried to allocate 49.00 GiB. GPU 0 has a total capacity of 31.84 GiB of which 0 bytes is free. Of the allocated memory 49.17 GiB is allocated by PyTorch, and 11.88 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+
+PART D the cost of attention | SID4=5330 SEED=5330
+  uuid: GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb
+  gpu_name: NVIDIA GeForce RTX 5090
+  driver_version: 610.60
+  cuda_version: 12.8
+  vram_total_mib: 32607
+  power_limit_w: 575.00
+  torch_version: 2.11.0+cu128
+  host: 5c9fd775c569
+  batch=1 heads=8 head_dim=64 dtype=fp16 reps=20
+
+[2026-09-18T22:36:52] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] configuration: batch=1 heads=8 head_dim=64 dtype=fp16 reps=20
+[2026-09-18T22:36:52] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive S=   512 peak=  0.0177 GiB latency=   0.0415 ms reps=20
+[2026-09-18T22:36:52] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive S=  1024 peak=  0.0431 GiB latency=   0.0669 ms reps=20
+[2026-09-18T22:36:52] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive S=  2048 peak=  0.1407 GiB latency=   0.2459 ms reps=20
+[2026-09-18T22:36:52] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive S=  4096 peak=  0.5236 GiB latency=   1.2346 ms reps=20
+[2026-09-18T22:36:52] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive S=  8192 peak=  2.0392 GiB latency=   4.7046 ms reps=20
+[2026-09-18T22:36:53] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive S= 16384 peak=  8.0704 GiB latency=  18.0848 ms reps=20
+[2026-09-18T22:36:56] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive extend S=  32768 ok
+[2026-09-18T22:37:15] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive extend S=  65536 OOM. CUDA out of memory. Tried to allocate 64.00 GiB. GPU 0 has a total capacity of 31.84 GiB of which 0 bytes is free. Including non-PyTorch memory, this process has 17179869184.00 GiB memory in use. Of the allocated memory 64.20 GiB is allocated by PyTorch, and 11.88 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+[2026-09-18T22:38:01] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive refine S=  49152 ok
+[2026-09-18T22:38:22] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive refine S=  57344 OOM. CUDA out of memory. Tried to allocate 49.00 GiB. GPU 0 has a total capacity of 31.84 GiB of which 0 bytes is free. Including non-PyTorch memory, this process has 17179869184.00 GiB memory in use. Of the allocated memory 49.17 GiB is allocated by PyTorch, and 11.88 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+[2026-09-18T22:38:48] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive refine S=  53248 OOM. CUDA out of memory. Tried to allocate 42.25 GiB. GPU 0 has a total capacity of 31.84 GiB of which 0 bytes is free. Including non-PyTorch memory, this process has 17179869184.00 GiB memory in use. Of the allocated memory 42.41 GiB is allocated by PyTorch, and 11.88 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+[2026-09-18T22:39:00] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive refine S=  51200 OOM. CUDA error: device not ready
+[2026-09-18T22:39:52] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive refine S=  50176 ok
+[2026-09-18T22:40:44] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive refine S=  50688 ok
+[2026-09-18T22:41:07] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive refine S=  50944 OOM. CUDA out of memory. Tried to allocate 38.67 GiB. GPU 0 has a total capacity of 31.84 GiB of which 0 bytes is free. Including non-PyTorch memory, this process has 17179869184.00 GiB memory in use. Of the allocated memory 38.83 GiB is allocated by PyTorch, and 11.88 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+[2026-09-18T22:41:07] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive: OOM bracket after 7 probes. Largest success 50688, smallest failure 50944 (resolution 256 tokens, NOT an exact single token boundary unless resolution is 1)
+[2026-09-18T22:41:07] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive: peak_mem = 32*S^2 + 4096*S + 8.51968e+06 bytes (R^2=1.000000). Measured S^2 coefficient 32.0000 bytes per token squared, against 32 expected if two S by S fp16 tensors are materialised (B*H*2*2)
+[2026-09-18T22:41:07] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] fused S=   512 peak=  0.0119 GiB latency=   0.0766 ms reps=20
+[2026-09-18T22:41:07] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] fused S=  1024 peak=  0.0158 GiB latency=   0.0443 ms reps=20
+[2026-09-18T22:41:07] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] fused S=  2048 peak=  0.0158 GiB latency=   0.2757 ms reps=20
+[2026-09-18T22:41:07] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] fused S=  4096 peak=  0.0237 GiB latency=   1.0736 ms reps=20
+[2026-09-18T22:41:07] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] fused S=  8192 peak=  0.0394 GiB latency=   2.0992 ms reps=20
+[2026-09-18T22:41:07] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] fused S= 16384 peak=  0.0709 GiB latency=   2.7809 ms reps=20
+[2026-09-18T22:41:07] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] fused extend S=  32768 ok
+[2026-09-18T22:41:07] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] fused extend S=  65536 ok
+[2026-09-18T22:41:08] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] fused extend S= 131072 ok
+[2026-09-18T22:41:08] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] fused: no OOM up to S=131072 (extension cap 131072). For the fused kernel this is the expected result. Its peak memory is linear in S, so it does not OOM anywhere near the naive boundary.
+[2026-09-18T22:41:08] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] fused: peak_mem = 0.0331491*S^2 + 3413.6*S + 1.14493e+07 bytes (R^2=0.997363). Measured S^2 coefficient 0.0331 bytes per token squared, against 32 for the naive kernel, so 0.104% of it. No S by S term, which is the whole claim. Peak memory is linear in S
+[2026-09-18T22:41:08] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] S=   512 fused speedup 0.54x, peak memory 1.49x smaller
+[2026-09-18T22:41:08] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] S=  1024 fused speedup 1.51x, peak memory 2.72x smaller
+[2026-09-18T22:41:08] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] S=  2048 fused speedup 0.89x, peak memory 8.90x smaller
+[2026-09-18T22:41:08] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] S=  4096 fused speedup 1.15x, peak memory 22.11x smaller
+[2026-09-18T22:41:08] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] S=  8192 fused speedup 2.24x, peak memory 51.72x smaller
+[2026-09-18T22:41:08] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] S= 16384 fused speedup 6.50x, peak memory 113.79x smaller
+
+PART E sustained load and thermal behaviour | SID4=5330 SEED=5330
+  uuid: GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb
+  gpu_name: NVIDIA GeForce RTX 5090
+  driver_version: 610.60
+  cuda_version: 12.8
+  vram_total_mib: 32607
+  power_limit_w: 575.00
+  torch_version: 2.11.0+cu128
+  host: 5c9fd775c569
+  minutes=20.0 interval=5.0s load=matmul N=8192 bf16
+
+[2026-09-18T22:42:10] [E] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] sampling throttle reasons via 'clocks_throttle_reasons.active'
+[2026-09-18T23:02:10] [E] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] thermal log written to logs/part_e_thermal_74396ae57bdb.csv (5.0s sampling)
+[2026-09-18T23:02:10] [E] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] peak throughput (first 30 s) = 230.52 TFLOPS, steady state (final 5 min, n=2967 samples) = 217.49 TFLOPS, steady over peak = 94.3%
+
+PART D the cost of attention | SID4=5330 SEED=5330
+  uuid: GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb
+  gpu_name: NVIDIA GeForce RTX 5090
+  driver_version: 610.60
+  cuda_version: 12.8
+  vram_total_mib: 32607
+  power_limit_w: 575.00
+  torch_version: 2.11.0+cu128
+  host: 5c9fd775c569
+  batch=1 heads=8 head_dim=64 dtype=fp16 reps=20
+
+[2026-09-19T00:46:51] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] configuration: batch=1 heads=8 head_dim=64 dtype=fp16 reps=20
+[2026-09-19T00:46:51] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] environment driver_vram_total_gib: 31.842
+[2026-09-19T00:46:51] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] environment driver_vram_free_gib: 30.202
+[2026-09-19T00:46:51] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] environment nvidia_smi_memory_total_mib: 32607
+[2026-09-19T00:46:51] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] environment running_under_wsl: yes
+[2026-09-19T00:46:51] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] environment PYTORCH_CUDA_ALLOC_CONF: unset
+[2026-09-19T00:46:51] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] environment CUDA_VISIBLE_DEVICES: unset
+[2026-09-19T00:46:51] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] environment platform: Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.31
+[2026-09-19T00:46:52] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive S=   512 peak=  0.0177 GiB latency=   0.1503 ms reps=20
+[2026-09-19T00:46:52] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive S=  1024 peak=  0.0431 GiB latency=     0.07 ms reps=20
+[2026-09-19T00:46:52] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive S=  2048 peak=  0.1407 GiB latency=   0.2926 ms reps=20
+[2026-09-19T00:46:52] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive S=  4096 peak=  0.5236 GiB latency=   1.2071 ms reps=20
+[2026-09-19T00:46:52] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive S=  8192 peak=  2.0392 GiB latency=   4.6977 ms reps=20
+[2026-09-19T00:46:53] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive S= 16384 peak=  8.0704 GiB latency=  17.9389 ms reps=20
+[2026-09-19T00:46:54] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive extend S=  32768 failed (implausible). implausible, peak 32.13 GiB exceeds physical VRAM 31.84 GiB, likely host memory fallback rather than a real on device allocation
+[2026-09-19T00:46:55] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive refine S=  24576 ok
+[2026-09-19T00:46:56] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive refine S=  28672 ok
+[2026-09-19T00:46:56] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive refine S=  30720 ok
+[2026-09-19T00:46:57] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive refine S=  31744 ok
+[2026-09-19T00:46:58] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive refine S=  32256 ok
+[2026-09-19T00:46:59] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive refine S=  32512 ok
+[2026-09-19T00:46:59] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive: OOM bracket after 6 probes. Largest success 32512, smallest failure 32768 (resolution 256 tokens, NOT an exact single token boundary unless resolution is 1)
+[2026-09-19T00:46:59] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive: 1 probe(s) reported a peak above the card's physical VRAM and were counted as failures, not successes. This host lets allocations spill out of VRAM, so an unchecked run would have reported a boundary far above the real one.
+[2026-09-19T00:46:59] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] naive: peak_mem = 32*S^2 + 4096*S + 8.51968e+06 bytes (R^2=1.000000). Measured S^2 coefficient 32.0000 bytes per token squared, against 32 expected if two S by S fp16 tensors are materialised (B*H*2*2)
+[2026-09-19T00:46:59] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] fused S=   512 peak=  0.0119 GiB latency=   0.0912 ms reps=20
+[2026-09-19T00:46:59] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] fused S=  1024 peak=  0.0158 GiB latency=   0.0319 ms reps=20
+[2026-09-19T00:46:59] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] fused S=  2048 peak=  0.0158 GiB latency=   0.0704 ms reps=20
+[2026-09-19T00:46:59] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] fused S=  4096 peak=  0.0237 GiB latency=   0.2131 ms reps=20
+[2026-09-19T00:47:00] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] fused S=  8192 peak=  0.0394 GiB latency=   0.8127 ms reps=20
+[2026-09-19T00:47:00] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] fused S= 16384 peak=  0.0709 GiB latency=   2.7823 ms reps=20
+[2026-09-19T00:47:00] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] fused extend S=  32768 ok
+[2026-09-19T00:47:00] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] fused extend S=  65536 ok
+[2026-09-19T00:47:00] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] fused extend S= 131072 ok
+[2026-09-19T00:47:00] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] fused: no OOM up to S=131072 (extension cap 131072). For the fused kernel this is the expected result. Its peak memory is linear in S, so it does not OOM anywhere near the naive boundary.
+[2026-09-19T00:47:00] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] fused: peak_mem = 0.0331491*S^2 + 3413.6*S + 1.14493e+07 bytes (R^2=0.997363). Measured S^2 coefficient 0.0331 bytes per token squared, against 32 for the naive kernel, so 0.104% of it. No S by S term, which is the whole claim. Peak memory is linear in S
+[2026-09-19T00:47:00] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] S=   512 fused speedup 1.65x, peak memory 1.49x smaller
+[2026-09-19T00:47:01] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] S=  1024 fused speedup 2.19x, peak memory 2.72x smaller
+[2026-09-19T00:47:01] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] S=  2048 fused speedup 4.16x, peak memory 8.90x smaller
+[2026-09-19T00:47:01] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] S=  4096 fused speedup 5.66x, peak memory 22.11x smaller
+[2026-09-19T00:47:01] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] S=  8192 fused speedup 5.78x, peak memory 51.72x smaller
+[2026-09-19T00:47:01] [D] [GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb] S= 16384 fused speedup 6.45x, peak memory 113.79x smaller

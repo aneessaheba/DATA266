@@ -61,8 +61,15 @@ SYNC_SLEEP_S = 2.0e-3
 class Vram:
     """A simulated allocator: current and peak bytes, and a ceiling that raises OOMs."""
 
-    def __init__(self, total_bytes):
+    def __init__(self, total_bytes, oversubscribe=False, context_dies=False):
         self.total = total_bytes
+        # oversubscribe models a host that silently serves allocations past the card
+        # out of system memory instead of failing, which is what the RTX 5090 lab run
+        # hit. Nothing raises, and the allocator happily reports a peak above the
+        # card's physical capacity.
+        self.oversubscribe = oversubscribe
+        self.context_dies = context_dies
+        self.oom_seen = False
         self.current = 0
         self.peak = 0
         # Seconds of simulated compute, accumulated per op at that op's own dtype rate,
@@ -72,7 +79,8 @@ class Vram:
         self.launches = 0
 
     def charge(self, nbytes, tensor):
-        if self.current + nbytes > self.total:
+        if self.current + nbytes > self.total and not self.oversubscribe:
+            self.oom_seen = True
             need = nbytes / 2 ** 30
             free = (self.total - self.current) / 2 ** 30
             raise torch.cuda.OutOfMemoryError(
@@ -274,12 +282,13 @@ def _fake_smi(cmd, kwargs, card, t0, fail_every):
     return subprocess.CompletedProcess(cmd, 0, ", ".join(values) + "\n", "")
 
 
-def install(card_key="4090", vram_gb=None, smi_fail_every=0, break_fp8=False):
+def install(card_key="4090", vram_gb=None, smi_fail_every=0, break_fp8=False,
+            oversubscribe=False, context_dies=False):
     """Stand up the fake device. Returns the card in use."""
     card = CARDS[card_key]
     total = int((vram_gb or card["vram_mib"] / 1024) * 2 ** 30)
     global VRAM
-    VRAM = Vram(total)
+    VRAM = Vram(total, oversubscribe=oversubscribe, context_dies=context_dies)
     _SIM["peaks"], _SIM["bw"] = card["sim_peaks"], card["sim_bw_gb_s"]
     t0 = time.time()
 
@@ -300,8 +309,19 @@ def install(card_key="4090", vram_gb=None, smi_fail_every=0, break_fp8=False):
     torch.cuda.reset_peak_memory_stats = lambda *a, **k: setattr(VRAM, "peak", VRAM.current)
     torch.cuda.max_memory_allocated = lambda *a, **k: VRAM.peak
     torch.cuda.memory_allocated = lambda *a, **k: VRAM.current
-    torch.cuda.synchronize = lambda *a, **k: time.sleep(SYNC_SLEEP_S)
+    def fake_sync(*a, **k):
+        # A context that has been knocked over reports the failure at the next
+        # synchronize, not at the call that broke it.
+        if VRAM.context_dies and VRAM.oom_seen:
+            raise torch.AcceleratorError("CUDA error: device not ready")
+        time.sleep(SYNC_SLEEP_S)
+
+    torch.cuda.synchronize = fake_sync
     torch.cuda.Event = FakeEvent
+    # The driver view of the card, which is the figure a peak has to be checked
+    # against. It reports physical capacity even when allocations are being served
+    # from somewhere else.
+    torch.cuda.mem_get_info = lambda *a, **k: (max(VRAM.total - VRAM.current, 0), VRAM.total)
 
     def rewrite(device):
         if device is None:
@@ -367,11 +387,17 @@ def main():
                     help="fail 1 in N nvidia-smi samples, to exercise the error path")
     ap.add_argument("--break-fp8", action="store_true",
                     help="make torch._scaled_mm raise, to exercise Part B's failure branch")
+    ap.add_argument("--oversubscribe", action="store_true",
+                    help="let allocations succeed past physical VRAM, reproducing the "
+                         "host memory fallback seen on the lab RTX 5090")
+    ap.add_argument("--context-dies", action="store_true",
+                    help="after the first OOM, make synchronize raise device not ready")
     ap.add_argument("target", help="the part script to run")
     ap.add_argument("target_args", nargs=argparse.REMAINDER)
     args = ap.parse_args()
 
-    install(args.card, args.vram_gb, args.smi_fail_every, args.break_fp8)
+    install(args.card, args.vram_gb, args.smi_fail_every, args.break_fp8,
+            args.oversubscribe, args.context_dies)
 
     import runpy
     sys.argv = [args.target] + [a for a in args.target_args if a != "--"]

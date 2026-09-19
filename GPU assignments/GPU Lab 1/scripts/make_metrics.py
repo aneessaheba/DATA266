@@ -48,31 +48,9 @@ def oom_cell(entry):
     return cell
 
 
-# nvidia-smi throttle reason bits. GpuIdle and ApplicationsClocksSetting are not
-# throttling, so they are never treated as an onset.
-THROTTLE_BITS = [
-    (0x0000000000000004, "SwPowerCap"),
-    (0x0000000000000008, "HwSlowdown"),
-    (0x0000000000000020, "SwThermalSlowdown"),
-    (0x0000000000000040, "HwThermalSlowdown"),
-    (0x0000000000000080, "HwPowerBrakeSlowdown"),
-]
-
-
-def decode_reasons(value):
-    """Names of the throttling bits set in an nvidia-smi reason field, if any."""
-    if not value:
-        return []
-    value = value.strip()
-    try:
-        bits = int(value, 16) if value.lower().startswith("0x") else int(value)
-    except ValueError:
-        # Some builds print text instead of a bitmask.
-        low = value.lower()
-        if "not active" in low or low in ("n/a", "unavailable", ""):
-            return []
-        return [value]
-    return [name for bit, name in THROTTLE_BITS if bits & bit]
+# Decoding lives in common.py so make_figures.py uses exactly the same rules.
+THROTTLE_BITS = common.THROTTLE_BITS
+decode_reasons = common.decode_throttle_reasons
 
 
 def load_start_index(samples):

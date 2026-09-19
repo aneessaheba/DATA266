@@ -1,0 +1,69 @@
+{
+  "identity": {
+    "uuid": "GPU-38ba4f51-a57b-4ca5-e2ab-74396ae57bdb",
+    "gpu_name": "NVIDIA GeForce RTX 5090",
+    "driver_version": "610.60",
+    "cuda_version": "12.8",
+    "vram_total_mib": "32607",
+    "power_limit_w": "575.00",
+    "torch_version": "2.11.0+cu128",
+    "host": "5c9fd775c569"
+  },
+  "vendor_spec_key": "NVIDIA GeForce RTX 5090",
+  "vendor_spec": {
+    "architecture": "Blackwell (GB202)",
+    "memory_type": "GDDR7",
+    "vram_gb": 32,
+    "memory_bus_bits": 512,
+    "memory_speed_gbps": 28,
+    "bandwidth_gb_s": 1792.0,
+    "cuda_cores": 21760,
+    "sms": 170,
+    "tensor_cores": 680,
+    "boost_clock_ghz": 2.407,
+    "tgp_w": 575,
+    "tensor_core_generation": "5th generation",
+    "tensor_core_precisions": [
+      "TF32",
+      "BF16",
+      "FP16",
+      "FP8 (E4M3/E5M2)",
+      "FP6",
+      "FP4",
+      "INT8"
+    ],
+    "peak_tflops_dense": {
+      "fp32": 104.8,
+      "tf32": 104.8,
+      "fp16": 209.5,
+      "bf16": 209.5,
+      "fp8": 419.0,
+      "fp4": 1676.0
+    },
+    "peak_tflops_dense_fp16_accumulate": {
+      "fp16": 419.0,
+      "fp8": 838.0
+    },
+    "peak_tops_dense": {
+      "int8": 838.0
+    },
+    "derivation": {
+      "bandwidth_gb_s": "512 bit bus by 28 Gbps over 8 bits per byte is 1792 GB/s. The whitepaper prints 1792 GB/sec directly.",
+      "fp32": "21760 CUDA cores by 2 FLOP per clock by 2.407 GHz is 104.8 TFLOPS. Whitepaper row 'Peak FP32 TFLOPS (non-Tensor)' is 104.8.",
+      "tf32": "Whitepaper row 'Peak TF32 Tensor TFLOPS' is 104.8/209.5, so 104.8 dense.",
+      "fp16_bf16": "Whitepaper rows 'Peak FP16/BF16 Tensor TFLOPS with FP32 Accumulate' are both 209.5/419, so 209.5 dense. The FP16 accumulate row is 419/838.",
+      "fp8": "Whitepaper row 'Peak FP8 Tensor TFLOPS with FP32 Accumulate' is 419/838, so 419 dense.",
+      "fp4": "Whitepaper row 'Peak FP4 Tensor TFLOPS with FP32 Accumulate (FP4 AI TOPS)' is 1676/3352. 1676 is dense and 3352 is sparse. The product page headline of 3352 AI TOPS is therefore FP4 with sparsity, exactly twice the dense rate, not four times, and never a valid denominator for a dense measurement."
+    },
+    "source": [
+      "NVIDIA RTX Blackwell GPU Architecture Whitepaper v1.1, Appendix A, Table 3, pages 46 to 47. https://images.nvidia.com/aem-dam/Solutions/geforce/blackwell/nvidia-rtx-blackwell-gpu-architecture.pdf",
+      "Same document, page 15 for memory bandwidth and TGP, page 46 for GB202 SM and CUDA core counts"
+    ],
+    "verified": true,
+    "verified_on": "2026-09-18",
+    "verified_how": "Whitepaper PDF downloaded and the Appendix A table read directly. Every value above appears verbatim in it."
+  },
+  "smi_q_file": "nvidia-smi-q_GeForce_RTX_5090_74396ae57bdb.txt",
+  "sid4": 5330,
+  "seed": 5330
+}

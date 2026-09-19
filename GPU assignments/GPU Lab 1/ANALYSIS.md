@@ -86,6 +86,17 @@ round that into a single number. The assignment explicitly penalises claiming an
 boundary you did not search for. If you want a single token, rerun with
 `--refine-resolution 1` and say so.
 
+**D5. The first run measured the host, not the card.**
+
+Worth its own paragraph, because it is the most interesting thing that happened. The
+first session reported naive attention succeeding at peaks of up to 76.77 GiB on a
+31.84 GiB card, with latency 500 times higher than the trend. Explain what the host was
+doing, why `torch.cuda.max_memory_allocated` did not catch it, and what the cross check
+against `torch.cuda.mem_get_info` changed. Give both boundaries, the 50688 you first got
+and the corrected one, and note that the corrected figure agrees with solving
+`32*S^2 + 4096*S` against physical VRAM. A measurement that disagrees with its own
+arithmetic by 50% is the useful part of this assignment.
+
 **D4. What the fused kernel avoids doing.** Three or four sentences. The substance to
 cover:
 

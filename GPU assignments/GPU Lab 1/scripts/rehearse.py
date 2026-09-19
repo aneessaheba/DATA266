@@ -140,6 +140,16 @@ def check_csvs(root, checks):
         checks.add(f"{name} UUID labelled on every row", has_uuid)
         if "reps" in rows[0]:
             checks.add(f"{name} records warmup alongside reps", "warmup" in rows[0])
+        if "vram_total_gib" in rows[0]:
+            bad = []
+            for r in rows:
+                try:
+                    if r["ok"] == "1" and float(r["peak_mem_gib"]) > float(r["vram_total_gib"]):
+                        bad.append(r["seq_len"])
+                except (TypeError, ValueError, KeyError):
+                    continue
+            checks.add(f"{name} no success exceeds physical VRAM", not bad,
+                       "clean" if not bad else f"S = {bad}")
 
     for path in sorted(glob.glob(os.path.join(root, "logs", "part_e_thermal_*.csv"))):
         name = os.path.basename(path)
@@ -203,6 +213,69 @@ def check_part_d(root, checks):
                        f"fused ok to {fused['largest_ok']}, naive to {naive['largest_ok']}")
 
 
+def check_failure_modes(checks, verbose):
+    """Replay the two failure modes the RTX 5090 lab run actually hit.
+
+    The first is a host that serves allocations past physical VRAM instead of failing,
+    so nothing raises and the allocator reports a peak larger than the card. Unchecked,
+    that walks the OOM search roughly 50% past the real boundary. The second is a CUDA
+    context that does not survive a failed allocation.
+    """
+    import tempfile
+    for label, flag, expect in (
+        ("oversubscribing host", "--oversubscribe", "implausible"),
+        ("context dies after OOM", "--context-dies", "context_dead"),
+    ):
+        root = tempfile.mkdtemp(prefix="hw25-failmode-")
+        for sub in ("data", "logs", "figures", "provenance"):
+            os.makedirs(os.path.join(root, sub), exist_ok=True)
+        env = dict(os.environ, HW25_ROOT=root)
+        cmd = [sys.executable, os.path.join(HERE, "fakecuda.py"), "--card", "5090", flag,
+               os.path.join(HERE, "part_d_attention.py"), "--index", "0",
+               "--warmup", "1", "--iters", "3"]
+        proc = subprocess.run(cmd, capture_output=True, text=True, env=env)
+        print(f"  part_d under {label:<24} exit {proc.returncode}")
+        if verbose or proc.returncode != 0:
+            print((proc.stdout or "").strip()[-2000:])
+            print((proc.stderr or "").strip()[-2000:])
+        if not checks.add(f"part_d survives a {label}", proc.returncode == 0,
+                          f"exit {proc.returncode}"):
+            continue
+
+        path = glob.glob(os.path.join(root, "data", "part_d_*.csv"))
+        path = [p for p in path if "summary" not in p]
+        rows = list(csv.DictReader(open(path[0]))) if path else []
+        kinds = {r.get("failure_kind", "") for r in rows}
+        checks.add(f"{label} is classified as {expect}", expect in kinds,
+                   f"kinds seen: {sorted(k for k in kinds if k)}")
+
+        # The invariant that matters: nothing may be recorded as a success while
+        # claiming more memory than the card physically holds.
+        bad = []
+        for r in rows:
+            try:
+                if r["ok"] == "1" and float(r["peak_mem_gib"]) > float(r["vram_total_gib"]):
+                    bad.append((r["seq_len"], r["peak_mem_gib"], r["vram_total_gib"]))
+            except (TypeError, ValueError, KeyError):
+                continue
+        checks.add(f"{label}: no success exceeds physical VRAM", not bad,
+                   "clean" if not bad else f"{len(bad)} bad rows, e.g. {bad[0]}")
+
+        summary = glob.glob(os.path.join(root, "data", "part_d_summary_*.json"))
+        naive = json.load(open(summary[0]))["summary"]["naive"] if summary else {}
+        if flag == "--oversubscribe":
+            # 32*S^2 + 4096*S = 31.84 GiB solves to about S = 32,600, so the recovered
+            # boundary has to land near there rather than 50k.
+            ok = naive.get("largest_ok") or 0
+            checks.add("oversubscribing host: boundary recovered near the predicted 32600",
+                       31000 <= ok <= 33000, f"largest_ok = {ok}")
+        else:
+            checks.add("context death is recorded in the summary",
+                       naive.get("context_died") is True,
+                       f"context_died = {naive.get('context_died')}")
+        shutil.rmtree(root, ignore_errors=True)
+
+
 def check_outputs(root, checks):
     figures = sorted(os.listdir(os.path.join(root, "figures")))
     for want in ("part_b_tflops_vs_size", "part_c_roofline", "part_d_peak_memory",
@@ -245,6 +318,8 @@ def main():
     checks = Checks()
     run_stage1(root, checks, args.verbose)
     run_stage2(root, checks, args.verbose)
+    print("\nstage 3: failure modes seen in the lab")
+    check_failure_modes(checks, args.verbose)
     print()
     check_run_log(root, checks)
     check_csvs(root, checks)

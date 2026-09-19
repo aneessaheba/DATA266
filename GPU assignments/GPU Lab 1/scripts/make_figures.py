@@ -226,22 +226,35 @@ def figure_e(path):
         ("power.draw", "Power draw (W)", SERIES[3], "{:.0f} W"),
     ]
 
-    # Throttle onset: first sample below 95% of the clock the card held while cold,
-    # counted only from the point the load actually started. Sampling begins before the
-    # first matmul lands, and scanning across those idle leading samples reports an
-    # onset of 0 s against an idle clock.
+    # Throttle onset, counted only from the point the load actually started. Sampling
+    # begins before the first matmul lands, and scanning across those idle leading
+    # samples would report an onset of 0 s against an idle clock.
+    #
+    # The card's own reason bits come first, exactly as make_metrics.py does it, with
+    # the 95% of cold clock heuristic only as a fallback. Using the heuristic alone
+    # made this figure claim no throttling on a run where the table reported SwPowerCap
+    # from the first loaded sample: the card sat at its power cap while holding 96.5%
+    # of its cold clock, which is throttling the heuristic cannot see.
     sm = _floats(rows, "clocks.current.sm")
     onset = None
+    reasons = ""
     start = 0
     if sm.size and not np.isnan(sm).all():
         busy = np.where(sm >= 0.5 * np.nanmax(sm))[0]
         start = int(busy[0]) if busy.size else 0
-    early = sm[start:][t[start:] <= t[start] + 30.0] if sm.size else sm
-    if early.size and not np.isnan(early).all():
-        baseline = np.nanmax(early)
-        below = np.where(sm[start:] < 0.95 * baseline)[0]
-        if below.size:
-            onset = float(t[start:][below[0]])
+    for i in range(start, len(rows)):
+        names = common.decode_throttle_reasons(
+            rows[i].get("clocks_throttle_reasons.active", ""))
+        if names:
+            onset, reasons = float(t[i]), ", ".join(names)
+            break
+    if onset is None:
+        early = sm[start:][t[start:] <= t[start] + 30.0] if sm.size else sm
+        if early.size and not np.isnan(early).all():
+            baseline = np.nanmax(early)
+            below = np.where(sm[start:] < 0.95 * baseline)[0]
+            if below.size:
+                onset = float(t[start:][below[0]])
 
     fig, axes = plt.subplots(len(panels), 1, figsize=(8.6, 10.0), sharex=True)
     for ax, (key, label, color, unit) in zip(axes, panels):
@@ -267,14 +280,20 @@ def figure_e(path):
     axes[0].set_title("Clock, temperature and power under sustained load",
                       color=INK, fontsize=12, pad=14, loc="left")
     axes[-1].set_xlabel("Elapsed time (s)", color=INK2, fontsize=10)
+    if onset is not None and reasons:
+        caption = f"nvidia-smi reports {reasons} from {onset:.0f} s"
+    elif onset is not None:
+        caption = f"SM clock falls below 95% of its cold value at {onset:.0f} s"
+    else:
+        caption = ("no throttle reason bits set and SM clock held above 95% of its cold "
+                   "value")
     if onset is not None:
-        axes[0].annotate(f"SM clock falls below 95% of its cold value at {onset:.0f} s",
-                         (onset, 1.0), xycoords=("data", "axes fraction"), color=INK,
-                         fontsize=9, va="top", ha="left",
+        axes[0].annotate(caption, (onset, 1.0), xycoords=("data", "axes fraction"),
+                         color=INK, fontsize=9, va="top", ha="left",
                          xytext=(6, -6), textcoords="offset points")
     else:
-        axes[0].annotate("SM clock never fell below 95% of its cold value", (0.02, 0.08),
-                         xycoords="axes fraction", color=INK2, fontsize=9)
+        axes[0].annotate(caption, (0.02, 0.08), xycoords="axes fraction",
+                         color=INK2, fontsize=9)
     save(fig, os.path.join(common.FIGURES, f"part_e_clock_temp_{tag_of(path)}.png"))
 
 

@@ -10,7 +10,11 @@ N=16384 TF32. This is not a measurement error. The peak TFLOPS figures in gpu_sp
 use NVIDIA rated boost clock of 2407 MHz. Part E measured sustained SM clock of 2737 MHz
 under load, 1.14x the rated boost clock, which alone explains readings up to 114% of the
 rated peak. This is necessary and sufficient to explain the observed inflation without
-appealing to higher transient clocks.
+appealing to higher transient clocks. The inflation is not uniform across precisions at
+N=16384, running 1.109x for TF32, 1.083x for BF16, 1.042x for FP8 and 1.024x for FP16,
+which supports the clock explanation rather than undermining it: the heavier the tensor
+operation, the more power it draws, so the lower the clock it can sustain against the
+575 W cap Part E recorded as active from the first loaded sample onward.
 
 Part D naive attention initially reported an OOM boundary of S=50688/50944, which was
 wrong. The probe at S=32768 reported a peak of 32.13 GiB, exceeding the cards physical

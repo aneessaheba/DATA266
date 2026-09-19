@@ -1,6 +1,42 @@
+## Part B: why small matrices never plateau
+
+A matmul does 2N cubed FLOPs while touching only 3N squared elements, so arithmetic
+intensity grows linearly with N and a small matrix simply does not carry enough work per
+byte moved to keep the tensor cores fed. Two fixed costs dominate instead, and neither
+shrinks with N. The first is per launch overhead, meaning kernel launch, cuBLAS algorithm
+selection and wave quantisation at the tile level, which is roughly constant and is
+amortised over work growing as N cubed, so it is a large fraction of the 0.053 ms median
+at N=1024 and disappears entirely into the 134.282 ms at N=16384. The second is
+occupancy: a 128 by 128 tiled GEMM at N=1024 produces only 64 tiles, which cannot fill
+the 170 SMs on GB202, so well over half the machine sits idle for the whole kernel no
+matter how fast the tensor cores are.
+
+This is why the plateau only arrives at N=4096 for FP32 and FP16 and at N=8192 for TF32,
+BF16 and FP8, and it is also why N=1024 carries by far the largest variance in the sweep,
+with coefficients of variation between 21.52% and 62.58% against under 1.8% at N=8192. At
+that size the kernel is short enough that launch and clock ramp noise is comparable to the
+work itself, so the N=1024 column should be read as an order of magnitude rather than a
+precise measurement.
+
+## Part D: what the fused kernel avoids doing
+
+The fused kernel never materialises the S by S score matrix in HBM at all, where the
+naive version writes the scores, reads them back for the softmax, writes the weights,
+then reads those back for the second matmul, so the quadratic term in the naive version
+is HBM traffic as much as it is HBM capacity. Instead it tiles the computation and runs
+the softmax online over blocks, keeping a running maximum and sum so each block can be
+rescaled as later blocks arrive, which lets the QK product, the softmax and the AV
+product stay fused in a single kernel with the intermediates held in SRAM and registers
+rather than round tripping through HBM. It performs the same arithmetic, so what it saves
+is bandwidth and capacity rather than FLOPs, which is exactly what my fit shows: the
+S squared coefficient falls from 32 bytes per token squared to 0.0331, and peak memory at
+S=16384 is 113.79 times smaller. The payoff compounds with sequence length, giving a
+6.448x speedup at S=16384 and letting the fused path still run at S=131072 where the naive
+path already fails at S=32768.
+
 ## Part F: the summary table
 
-Table HW2.5.1 is in METRICS.md. Every cell traces to a UUID labelled line in
+Table HW2.5.1 is generated into METRICS.md. Every cell traces to a UUID labelled line in
 RUN_LOG.txt.
 
 Commentary the table cannot carry:

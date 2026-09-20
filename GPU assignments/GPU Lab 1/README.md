@@ -35,17 +35,12 @@ pip install torch matplotlib numpy       # if the box does not already have them
 GPU=1 ./run_all.sh                       # a second card in the same chassis
 ```
 
-The allocated lab machine logs in as `.\anees`, so it is almost certainly Windows, where
-`run_all.sh` will not run. Use `powershell -ExecutionPolicy Bypass -File run_all.ps1`, or
-run the seven python commands by hand. `LAB_RUNBOOK.md` lists them and covers the other
-Windows specifics.
+The measurements in this repository were taken inside a Linux container under WSL2 on the
+lab machine, so `run_all.sh` ran directly. Each script can also be invoked on its own.
 
 `SMOKE=1 ./run_all.sh` is a roughly one minute end to end chain check. It shortens every
 part, not just Part E, and must not be submitted. Clear `data/`, `logs/`, `figures/` and
 `RUN_LOG.txt` afterwards. `MINUTES=n` shortens Part E alone.
-
-`LAB_RUNBOOK.md` has the pre flight checks, the time budget per part, and what to verify
-before releasing the machine.
 
 Each script can also be run alone, and all of them take `--index` to choose the GPU:
 

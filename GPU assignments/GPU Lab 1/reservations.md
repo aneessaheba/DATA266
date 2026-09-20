@@ -26,7 +26,7 @@ machine goes to the next group.
 | Day | Check in done | Time | Notes |
 |---|---|---|---|
 | Fri 18 Sep 2026 | yes | 12:00 PDT | logged in, ran Parts A through E |
-| Sat 19 Sep 2026 | | | |
+| Sat 19 Sep 2026 | no | | did not check in. All measurements were completed on Friday, so the machine was not needed on the second day |
 
 ## Hours actually consumed
 

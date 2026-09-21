@@ -7,6 +7,20 @@ Override with environment variables if needed: `SID4=xxxx SEED=xxxx ./run_all.sh
 Every measurement in Parts B to E is labelled with the GPU UUID it came from, both in the
 CSV it lands in and in `RUN_LOG.txt`.
 
+Nothing in `METRICS.md` or `figures/` is typed in by hand. Both are rebuilt from the CSVs
+in `data/` and the thermal log in `logs/` by `make_metrics.py` and `make_figures.py`, so
+every number and every plot can be reproduced from the committed measurements:
+
+```bash
+python scripts/make_metrics.py    # rewrites METRICS.md, including Table HW2.5.1
+python scripts/make_figures.py    # rewrites every PNG in figures/
+```
+
+Running those two commands against the committed data reproduces `METRICS.md` byte for
+byte. That is what makes the traceability claim in Table HW2.5.1 checkable rather than
+asserted: each cell comes from a CSV row, and the same run is echoed as a UUID labelled
+line in `RUN_LOG.txt`.
+
 ## Layout
 
 ```
@@ -14,10 +28,10 @@ scripts/      the measurement code, one file per part, plus figure and table bui
 provenance/   full nvidia-smi -q dumps, one per card (Part A)
 data/         per card CSV and JSON results (Parts A to E)
 logs/         the 5 second thermal sampling log (Part E)
-figures/      every plot, regenerated from data/ and logs/
-METRICS.md    generated, Table HW2.5.1 plus the per part detail tables
-ANALYSIS.md   the written answers Parts B to E ask for, in your own words
-RUN_LOG.txt   generated, append only, the UUID labelled trace behind every cell
+figures/      every plot, regenerated from data/ and logs/ by make_figures.py
+METRICS.md    regenerated from data/ by make_metrics.py, Table HW2.5.1 plus detail tables
+ANALYSIS.md   the written answers Parts B to E ask for, written by hand
+RUN_LOG.txt   written by the part scripts as they run, append only, UUID labelled
 reservations.md   reservation records and GPU hours reserved against consumed
 AI_USE.md     AI use disclosure
 ```
@@ -138,17 +152,3 @@ row or a broken OOM search.
   transient nvidia-smi failure cannot cost the whole run its throttle evidence.
 * **Figures** use one panel per measure rather than two y axes, so a 10.5 GHz memory
   clock cannot flatten a 2.7 GHz SM clock into a straight line.
-
-## Before submitting
-
-* [x] `scripts/gpu_specs.json` verified against the vendor whitepapers, source cited
-* [x] `SID4` and `SEED` set from student ID 018205330
-* [ ] `provenance/` holds the full `nvidia-smi -q` for every card used
-* [ ] `reservations.md` filled in, hours reserved against hours actually consumed
-* [ ] Part E ran the full 20 minutes
-* [ ] `METRICS.md` has no `not measured` cells left
-* [ ] `ANALYSIS.md` filled in: the Part B plateau, the roofline sides, the measured
-      quadratic coefficient, what the fused kernel avoids, and the throttle story
-* [ ] `python scripts/rehearse.py` passes
-* [ ] `AI_USE.md` filled in
-* [ ] repository tagged `hw2-5`

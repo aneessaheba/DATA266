@@ -36,7 +36,7 @@ path already fails at S=32768.
 
 ## Part F: the summary table
 
-Table HW2.5.1 is generated into METRICS.md. Every cell traces to a UUID labelled line in
+Table HW2.5.1 is in METRICS.md. Every cell traces to a UUID labelled line in
 RUN_LOG.txt.
 
 Commentary the table cannot carry:

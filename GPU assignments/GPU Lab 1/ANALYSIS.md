@@ -73,6 +73,11 @@ Part E throttle onset originally read as 0 seconds because the scan compared eve
 sample, including the pre ramp idle sample at 0.1 s, against the loaded baseline. Fixed
 by excluding samples before the load ramps up. Corrected onset is 5 s, 52C, 574.98W,
 matching the card reaching its power cap almost immediately after sustained load begins.
+Unlike the other cells in Table HW2.5.1, this one is not printed directly by the run. It
+is derived from the committed thermal log, which the Part E block in RUN_LOG.txt names as
+logs/part_e_thermal_74396ae57bdb.csv, and the first loaded sample in that file reads
+5.16 s, 2737 MHz, 52 C, 574.98 W with throttle bits 0x0000000000000004, which decodes to
+SwPowerCap.
 
 The lab Docker image ships PyTorch 2.1.2, which does not support the RTX 5090s Blackwell
 architecture, CUDA capability sm_120, kernel launches fail with no kernel image is

@@ -3,6 +3,13 @@
 Fine tuning FLAN T5 Small with LoRA (PEFT) to summarize dialogues from the DialogSum dataset,
 and comparing outputs before and after fine tuning.
 
+## Personal parameters
+
+SID4 = 5330, SEED = 5330, SLICE = 330, HP_ID = 2, CLS_A = 0, CLS_B = 3. They are stated in the
+first cell of the notebook. Only SEED is used: Python random, NumPy and PyTorch are all seeded
+with it, and the PyTorch seed is reset before each LoRA model is built. HP_ID does not apply
+because the rank sweep (r = 4 and r = 16) is fixed for all students.
+
 ## Files
 
 * `notebooks/assignment5_lora_dialogsum.ipynb`: the submission notebook with all outputs saved.
@@ -38,15 +45,16 @@ Decoding is greedy with at most 100 new tokens, the same for every model.
 | model | final training loss | ROUGE 1 | ROUGE 2 | ROUGE L |
 |---|---|---|---|---|
 | baseline | none | 0.101 | 0.023 | 0.091 |
-| LoRA r = 4 | 1.407 | 0.364 | 0.131 | 0.299 |
-| LoRA r = 16 | 1.339 | 0.373 | 0.128 | 0.301 |
+| LoRA r = 4 | 1.416 | 0.379 | 0.128 | 0.313 |
+| LoRA r = 16 | 1.341 | 0.374 | 0.120 | 0.304 |
 
 Before fine tuning the model outputs unrelated fragments ("Is this all correct?", "Talk to
 the driver."). After fine tuning it writes real summaries that capture the main topics, but
 still repeats itself and sometimes confuses who said what.
 
-The two ranks show no measurable difference on ROUGE. r = 16 reaches a lower training loss,
-and on the two samples the results are mixed. The smaller rank is a reasonable choice for
+r = 4 scores slightly higher on ROUGE and r = 16 reaches a lower training loss, but with one
+seed and 100 dialogues the gap is too small to call a real difference, and on the two samples
+the results are mixed. The smaller rank is a reasonable choice for
 cost, but the results do not show that it is better.
 
 ## Running

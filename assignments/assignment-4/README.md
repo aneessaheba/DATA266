@@ -1,59 +1,59 @@
-# Assignment 4
+# Assignment 4: Mini GPT from Scratch
 
-A GPT style decoder only Transformer built from scratch, trained on the character level
-Shakespeare corpus, and sampled with greedy, temperature and top-k decoding.
+A decoder only Transformer built from `nn.Linear`, `nn.LayerNorm`, `nn.GELU` and
+`nn.Embedding`, trained on character level Shakespeare, then sampled with greedy, temperature
+and top k decoding. The multi head attention, the causal mask, the decoder block and the
+sampling loop are written by hand. No `nn.Transformer`, no `nn.MultiheadAttention`, no
+HuggingFace models.
 
-The multi-head masked self attention, the causal mask, the decoder block and the sampling
-loop are all written by hand from `nn.Linear`, `nn.LayerNorm`, `nn.GELU` and `nn.Embedding`.
-No `nn.Transformer`, no `nn.MultiheadAttention`, no HuggingFace transformer models.
+## Personal parameters
+
+| SID4 | SEED | SLICE | HP_ID | CLS_A | CLS_B |
+|---|---|---|---|---|---|
+| 5330 | 5330 | 330 | 2 | 0 | 3 |
+
+`SEED` seeds Python, NumPy and PyTorch. The other four are stated as required by standing
+requirement 0.1 but are not referenced by this assignment.
 
 ## Files
 
-* `notebooks/assignment4_mini_gpt.ipynb`: the submission notebook, with all outputs saved.
-  Part 1 is character level tokenization and the sliding window dataset, Part 2 the
-  architecture, Part 3 training, Part 4 the three decoding strategies, Part 5 the analysis.
-* `HW4_Document.pdf`: the findings write up, matching the notebook's outline.
-* `data/shakespeare.txt`: the corpus. 1,115,394 characters, 65 distinct characters.
-* `data/training_loss.png`: the loss curve produced by the notebook.
+* `notebooks/assignment4_mini_gpt.ipynb`, the submission notebook with outputs saved
+* `HW4_Document.pdf`, the findings write up
+* `data/shakespeare.txt`, the corpus, 1,115,394 characters, 65 distinct characters
+* `data/training_loss.png`, the loss curve
 
 ## Model and training
 
 3,225,153 parameters: hidden dimension 256, 4 heads, 4 decoder layers, context length 128.
-Trained with Adam at a learning rate of 1e-3, batch size 64, for 6 epochs.
+Adam, learning rate 1e-3, batch size 64, 6 epochs.
 
 | Epoch | 1 | 2 | 3 | 4 | 5 | 6 |
 |---|---|---|---|---|---|---|
-| Training loss | 1.8955 | 1.3892 | 1.2651 | 1.1829 | 1.1064 | 1.0272 |
+| Training loss | 1.9114 | 1.3937 | 1.2691 | 1.1858 | 1.1083 | 1.0293 |
 
 ## Decoding comparison
 
-Each setting is scored on two measures, averaged over 3 generations of 300 characters from
-the prompt `ROMEO:`. Valid word rate is the fraction of words that occur in the corpus, so it
-measures coherence. Distinct-3 is the fraction of character trigrams that are unique, so it
-measures diversity.
+Averaged over three generations of 300 characters from the prompt `ROMEO:`. Valid word rate
+measures coherence, unique trigram rate measures diversity.
 
-| decoding | valid words | distinct-3 |
+| decoding | valid words | unique trigrams |
 |---|---|---|
-| greedy | **0.984** | 0.671 |
-| temperature 0.5 | **0.984** | 0.753 |
-| temperature 1.0 | 0.864 | 0.864 |
-| temperature 1.5 | 0.755 | **0.905** |
-| top-k, k = 2 | 0.932 | 0.746 |
-| top-k, k = 40 | 0.869 | 0.859 |
+| greedy | 0.952 | 0.574 |
+| temperature 0.5 | **0.962** | 0.734 |
+| temperature 1.0 | 0.924 | 0.831 |
+| temperature 1.5 | 0.770 | **0.884** |
+| top k = 2 | 0.943 | 0.730 |
+| top k = 40 | 0.924 | 0.831 |
 
-Most coherent is greedy. It ties with temperature 0.5 on valid word rate, but it has the
-lowest diversity of any setting, so it is the most conservative of the two. Most diverse is
-temperature 1.5, which buys that diversity with the worst coherence.
+Most coherent is temperature 0.5. Greedy spells about as well but has the lowest diversity of
+any setting and repeats itself heavily. Most diverse is temperature 1.5, at the cost of the
+worst coherence. Top k at k = 40 produced output identical to temperature 1.0, because on a 65
+character vocabulary the 25 lowest ranked characters are never sampled anyway.
 
-Top-k at k = 40 produced output byte identical to temperature 1.0, because on a 65 character
-vocabulary the 25 lowest ranked characters carry too little probability to ever be sampled.
-Top-k only does real work when k is small relative to the number of characters the model is
-actually considering.
+## Rerunning
 
-## Rerunning the notebook
-
-Requires `torch`, `matplotlib` and `jupyter`. Run from the `notebooks/` directory, since the
-notebook reads the corpus at `../data/shakespeare.txt`:
+Requires `torch`, `numpy`, `matplotlib` and `jupyter`. Run from `notebooks/`, since the
+notebook reads `../data/shakespeare.txt`:
 
 ```
 cd notebooks
@@ -61,6 +61,4 @@ jupyter nbconvert --to notebook --execute --inplace \
     --ExecutePreprocessor.timeout=3600 assignment4_mini_gpt.ipynb
 ```
 
-The notebook picks MPS, then CUDA, then CPU. It was run on MPS, where training takes about 7
-minutes. The seed is fixed, though GPU reductions are not bit exact across backends, so
-sampled text may differ on a different device.
+The notebook picks MPS, then CUDA, then CPU. On MPS the full run takes about 12 minutes.

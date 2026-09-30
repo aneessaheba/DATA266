@@ -21,8 +21,8 @@ because the rank sweep (r = 4 and r = 16) is fixed for all students.
 ## Data
 
 DialogSum from Hugging Face: 1,999 train, 499 validation and 499 test dialogues. The input is
-the dialogue wrapped in a short instruction prompt ("Summarize the following conversation."),
-the format FLAN T5 was trained on. The target is the human written summary. Each test dialogue
+the dialogue wrapped in an instruction style prompt ("Summarize the following conversation."),
+of the kind FLAN T5 was trained on. The target is the human written summary. Each test dialogue
 appears three times with different reference summaries, so the two sample dialogues are test
 rows 0 and 3, and ROUGE uses every third test row (100 different dialogues).
 
@@ -50,12 +50,12 @@ Decoding is greedy with at most 100 new tokens, the same for every model.
 
 Before fine tuning the model outputs unrelated fragments ("Is this all correct?", "Talk to
 the driver."). After fine tuning it writes real summaries that capture the main topics, but
-still repeats itself and sometimes confuses who said what.
+still repeats itself and confuses some roles and facts.
 
 r = 4 scores slightly higher on ROUGE and r = 16 reaches a lower training loss, but with one
 seed and 100 dialogues the gap is too small to call a real difference, and on the two samples
-the results are mixed. The smaller rank is a reasonable choice for
-cost, but the results do not show that it is better.
+the results are mixed. The smaller rank is a reasonable choice for cost, at a quarter of the
+trainable parameters, but the results do not show that it is better.
 
 ## Running
 

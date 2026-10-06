@@ -112,6 +112,30 @@ acc = {"Supervised": (embed(sup, Xt).argmax(1) == yt).float().mean().item()}
 print(f"Part A test accuracy: {acc['Supervised']:.4f}")
 """)
 
+md("## Part B: Rotation Prediction\n\nEach unlabeled image (all 100,000) gets one random rotation of 0, 90, 180 or 270 degrees per epoch. Then the rotation head is dropped, the encoder is frozen and only a linear layer is trained on the 500 labels.")
+
+code("""
+rot = nn.Sequential(encoder(), nn.Linear(512, 4).to(device))
+opt = torch.optim.Adam(rot.parameters(), 1e-3)
+for ep in range(15):
+    rot.train()
+    correct = 0
+    for b in batches(len(Xu), 256):
+        x = prep(Xu[b])
+        r = torch.randint(0, 4, (len(x),), device=device)
+        for k in range(1, 4):
+            x[r == k] = torch.rot90(x[r == k], k, (2, 3))
+        out = rot(x)
+        loss = F.cross_entropy(out, r)
+        opt.zero_grad()
+        loss.backward()
+        opt.step()
+        correct += (out.argmax(1) == r).sum().item()
+    print(f"epoch {ep + 1} loss {loss.item():.3f} rotation acc {correct / len(Xu):.3f}")
+acc["Rotation"] = linear_probe(rot[0])
+print(f"Part B test accuracy: {acc['Rotation']:.4f}")
+""")
+
 nb = nbf.v4.new_notebook()
 nb["cells"] = cells
 nb["metadata"]["kernelspec"] = {"name": "python3", "display_name": "Python 3", "language": "python"}

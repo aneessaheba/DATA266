@@ -13,14 +13,12 @@ Part D shows top 5 cosine nearest neighbors for three test queries with each enc
 ## Files
 
 * `notebooks/assignment6_ssl_stl10.ipynb`, the notebook with outputs
-* `scripts/build_notebook.py`, generates the notebook
 
 ## Rerunning
 
 Requires `torch`, `torchvision`, `matplotlib` and `jupyter`. STL10 downloads to `data/` on first run.
 
 ```
-python scripts/build_notebook.py
 cd notebooks
 jupyter nbconvert --to notebook --execute --inplace assignment6_ssl_stl10.ipynb
 ```

@@ -8,7 +8,7 @@ ResNet18 with no pretrained weights in every part. SEED = 5330.
 | B | Rotation pretraining on 100,000 unlabeled images, frozen encoder, linear layer | 0.4476 |
 | C | SimCLR on 20,000 unlabeled images, tau 0.2, frozen encoder, linear layer | 0.5401 |
 
-Part D shows top 5 cosine nearest neighbors for three test queries with each encoder. The analysis is the last cell of the notebook.
+Part D shows top 5 cosine nearest neighbors for three test queries with each encoder. The analysis is below and in the last cell of the notebook.
 
 ## Files
 

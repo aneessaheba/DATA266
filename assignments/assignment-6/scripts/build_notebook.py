@@ -173,6 +173,33 @@ acc["SimCLR"] = linear_probe(simclr)
 print(f"Part C test accuracy: {acc['SimCLR']:.4f}")
 """)
 
+md("## Part D: Nearest Neighbors\n\nTest set embeddings are the 512 dimensional encoder outputs. Neighbors are ranked by cosine similarity. Precision at 5 (share of the 5 neighbors with the query's class) over all 8,000 test images is also reported.")
+
+code("""
+encoders = {"Supervised": sup[0], "Rotation": rot[0], "SimCLR": simclr}
+queries = [int(rng.choice(np.where(yt.numpy() == c)[0])) for c in rng.choice(10, 3, replace=False)]
+top = {}
+for name, enc in encoders.items():
+    E = F.normalize(embed(enc, Xt), dim=1)
+    S = E @ E.T
+    S.fill_diagonal_(-2)
+    top[name] = S.topk(5).indices
+    print(f"{name}: linear acc {acc[name]:.4f}, precision@5 {(yt[top[name]] == yt[:, None]).float().mean():.4f}")
+
+fig, ax = plt.subplots(9, 6, figsize=(12, 19))
+for i, q in enumerate(queries):
+    for j, name in enumerate(encoders):
+        row = ax[3 * i + j]
+        for c, t in enumerate([q] + top[name][q].tolist()):
+            row[c].imshow(Xt[t].permute(1, 2, 0))
+            row[c].set_title(("Query: " if c == 0 else "") + CLASSES[yt[t]], fontsize=9,
+                             color="black" if c == 0 or yt[t] == yt[q] else "red")
+            row[c].axis("off")
+        row[0].text(-10, 48, name, rotation=90, va="center", ha="right", fontsize=10)
+plt.tight_layout()
+plt.show()
+""")
+
 nb = nbf.v4.new_notebook()
 nb["cells"] = cells
 nb["metadata"]["kernelspec"] = {"name": "python3", "display_name": "Python 3", "language": "python"}

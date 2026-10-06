@@ -136,6 +136,43 @@ acc["Rotation"] = linear_probe(rot[0])
 print(f"Part B test accuracy: {acc['Rotation']:.4f}")
 """)
 
+md("## Part C: SimCLR\n\n20,000 unlabeled images. Two views per image from the four demo augmentations: random resized crop, horizontal flip, color jitter and random grayscale. NT Xent loss on cosine similarity with temperature 0.2 and an MLP projection head.")
+
+code("""
+aug = T.Compose([
+    T.RandomResizedCrop(96, scale=(0.2, 1.0)),
+    T.RandomHorizontalFlip(),
+    T.RandomApply([T.ColorJitter(0.4, 0.4, 0.4, 0.1)], p=0.8),
+    T.RandomGrayscale(p=0.2),
+])
+Xs = Xu[torch.from_numpy(rng.choice(len(Xu), 20000, replace=False))]
+
+
+def nt_xent(z1, z2, tau=0.2):
+    z = F.normalize(torch.cat([z1, z2]), dim=1)
+    sim = (z @ z.T / tau).masked_fill(torch.eye(len(z), dtype=torch.bool, device=device), float("-inf"))
+    n = len(z1)
+    target = torch.cat([torch.arange(n, 2 * n), torch.arange(n)]).to(device)
+    return F.cross_entropy(sim, target)
+
+
+simclr = encoder()
+head = nn.Sequential(nn.Linear(512, 512), nn.ReLU(), nn.Linear(512, 128)).to(device)
+opt = torch.optim.Adam(list(simclr.parameters()) + list(head.parameters()), 1e-3)
+for ep in range(20):
+    simclr.train()
+    for b in batches(len(Xs), 256):
+        v1 = prep(torch.stack([aug(x) for x in Xs[b]]))
+        v2 = prep(torch.stack([aug(x) for x in Xs[b]]))
+        loss = nt_xent(head(simclr(v1)), head(simclr(v2)))
+        opt.zero_grad()
+        loss.backward()
+        opt.step()
+    print(f"epoch {ep + 1} loss {loss.item():.3f}")
+acc["SimCLR"] = linear_probe(simclr)
+print(f"Part C test accuracy: {acc['SimCLR']:.4f}")
+""")
+
 nb = nbf.v4.new_notebook()
 nb["cells"] = cells
 nb["metadata"]["kernelspec"] = {"name": "python3", "display_name": "Python 3", "language": "python"}

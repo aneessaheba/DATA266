@@ -55,6 +55,9 @@ for c in cards:
       + (f"Training {len(extra)} more epochs cost {sum(e['epoch_s'] for e in extra):.1f} s and moved validation loss "
          f"from {best['val_loss']:.4f} to {h['epochs'][-1]['val_loss']:.4f} (accuracy {best['val_acc']:.4f} to "
          f"{h['epochs'][-1]['val_acc']:.4f}).\n" if extra else "No epochs were trained past it.\n"))
+    top = max(h["epochs"], key=lambda e: e["val_acc"])
+    W(f"Validation accuracy peaked at epoch {top['epoch']} ({top['val_acc']:.4f}), later than validation loss. "
+      f"The saved model and all test numbers below come from the final epoch {h['epochs'][-1]['epoch']} model.\n")
     W(f"Test accuracy after save and reload: {h['test_acc']:.4f}. "
       f"**Peak GPU memory {h['peak_gb']:.2f} GB, training wall clock {h['train_s']:.1f} s** (HW4.5 baseline only).\n")
     names = [p["cls"] for p in h["per_class"]]
@@ -63,7 +66,7 @@ for c in cards:
     table(["Class", "Precision", "Recall", "F1", "Support"],
           [[p["cls"], f"{p['precision']:.3f}", f"{p['recall']:.3f}", f"{p['f1']:.3f}", p["n"]] for p in h["per_class"]])
     W(f"Worst class (lowest F1): **{h['worst_class']}**. Five misclassified examples, diagnosis in ANALYSIS.md:\n")
-    table(["#", "Tweet", "Predicted"], [[i + 1, m["text"].replace("|", "/").replace("\n", " "), m["pred"]]
+    table(["#", "Tweet", "Predicted"], [[i + 1, m["text"].replace("|", "/").replace("\n", " ").replace("\\u2019", "'") + (" (sic: the apostrophe is stored escaped in the dataset)" if "\\u2019" in m["text"] else ""), m["pred"]]
                                         for i, m in enumerate(h["misclassified"])])
     table(["Custom input", "Prediction"], [[x["text"], x["pred"]] for x in h["custom"]])
     fig, ax = plt.subplots(1, 2, figsize=(9, 3.5))
@@ -95,6 +98,9 @@ for c in cards:
         W(f"Model `{s['model']}`, fp16, {s['new_tokens']} new tokens per request, greedy. Prompt: \"{s['prompt']}\"\n")
         table(["Configuration", "Tokens/sec", "p50 latency (ms)", "p95 latency (ms)"], serve_rows(c, "hw4"))
         W("Sample output: " + s["sample_output"].replace("\n", " ")[:400] + "\n")
+        W("Method: latency is the time for the whole batch call to finish, every request generates exactly 128 tokens "
+          "(ignore_eos), and time to first token is not measured. The 8 prompts repeat inside the batch 8 and 32 runs, "
+          "so vLLM prefix caching may help those slightly.\n")
 
 # HW4.5 Part A
 W("## HW4.5 Part A, batch scaling to the memory wall\n")
@@ -120,6 +126,13 @@ ax.legend()
 fig.tight_layout()
 fig.savefig(os.path.join(FIG, "part_a_throughput.png"), dpi=120)
 W("![throughput](figures/part_a_throughput.png)\n")
+W("Method: each row is timed over 5 steps after 2 warmup steps on randomly sampled batches, and Epoch s is extrapolated "
+  "as 3500 / samples per second, not measured. These short timings are optimistic: at batch 32 they give 106.8 samples/s "
+  "and 32.8 s per epoch, while the sustained Part B baseline ran at 91.9 samples/s (about 14% lower) and the measured "
+  "HW4.a epochs took 37 to 44 s.\n")
+if len(maxb) < 2:
+    W("Only one card was used (the TA confirmed one GPU is enough), so the max batch ratio between two cards is not "
+      "measured. ANALYSIS.md gives a worked projection instead.\n")
 if len(maxb) == 2:
     c1, c2 = sorted(maxb, key=lambda c: -R[c]["part_a"]["gpu"]["vram_gb"])
     v1, v2 = R[c1]["part_a"]["gpu"]["vram_gb"], R[c2]["part_a"]["gpu"]["vram_gb"]
@@ -134,7 +147,7 @@ for c in cards:
         continue
     W(f"### Table HW4.5.1 on {c} (AMP dtype {b['amp_dtype']})\n")
     table(["Technique", "Max batch", "Throughput (samp/s)", "Peak memory (GB)", "Eval accuracy", "Wall s", "Notes"],
-          [[r["technique"], r["max_batch"], f"{r['samples_per_s']:.1f}", f"{r['peak_gb']:.2f}", f"{r['test_acc']:.4f}",
+          [[r["technique"], "n/a" if r["technique"] == "Gradient accumulation" else r["max_batch"], f"{r['samples_per_s']:.1f}", f"{r['peak_gb']:.2f}", f"{r['test_acc']:.4f}",
             f"{r['wall_s']:.1f}", f"{r['optimizer']}, effective batch {r['effective_batch']}, {r['opt_steps']} optimiser steps"]
            for r in b["rows"]])
     base = b["rows"][0]
@@ -143,10 +156,33 @@ for c in cards:
         saved, lost = base["peak_gb"] - r["peak_gb"], base["samples_per_s"] - r["samples_per_s"]
         rank.append((saved / lost if lost > 0 else float("inf"), r["technique"], saved, lost))
     rank.sort(reverse=True)
-    W("Ranking by memory saved per unit of throughput lost (peak GB at the training batch, samples/s):\n")
+    W("Gradient accumulation has no max batch of its own: per step memory is set by the physical batch of 16, so it is "
+      "marked n/a. Its run trained 436 optimiser steps x 128 samples = 55,808 samples, about 16 epochs over 3500 rows. "
+      "The training loop also dropped the last 2 of the 218 micro batches in each epoch (218 is not a multiple of 8).\n")
+    W("Ranking at the training batch of 32 (peak GB saved per samples/s lost):\n")
     table(["Rank", "Technique", "GB saved", "Samples/s lost", "GB saved per samp/s lost"],
           [[i + 1, t, f"{s:.3f}", f"{l:.1f}", "no throughput lost" if x == float("inf") else f"{x:.4f}"]
            for i, (x, t, s, l) in enumerate(rank)])
+    pr = R[c].get("part_b_probes", {}).get("probes")
+    if pr:
+        at = lambda k: next(r for r in pr[k] if r["batch"] == 256)
+        b0 = at("Part A baseline")
+        rows256, rank256 = [], []
+        for k in ("Part A baseline", "Mixed precision", "Gradient checkpointing", "8-bit optimiser", "Best combination"):
+            r = at(k)
+            rows256.append([k.replace("Part A baseline", "Baseline"), f"{r['peak_gb']:.2f}", f"{r['samples_per_s']:.1f}"])
+            if k not in ("Part A baseline", "Best combination"):
+                saved, lost = b0["peak_gb"] - r["peak_gb"], b0["samples_per_s"] - r["samples_per_s"]
+                rank256.append((saved / lost if lost > 0 else float("inf"), k, saved, lost))
+        rank256.sort(reverse=True)
+        W("Same techniques at batch 256, from the max batch probe runs (5 timed steps each, so throughput is optimistic):\n")
+        table(["Batch 256", "Peak GB", "Samples/s"], rows256)
+        W("Ranking at batch 256 (accumulation has no batch 256 run):\n")
+        table(["Rank", "Technique", "GB saved", "Samples/s lost", "GB saved per samp/s lost"],
+              [[i + 1, t, f"{s:.2f}", f"{l:.1f}", "no throughput lost" if x == float("inf") else f"{x:.3f}"]
+               for i, (x, t, s, l) in enumerate(rank256)])
+        W("The ranking depends on batch size. At batch 32 activations are small, so checkpointing saves little and ranks "
+          "last. At batch 256 activations dominate, so checkpointing saves 8.7 GB and ranks above the 8 bit optimiser.\n")
 
 # Part C
 W("## HW4.5 Part C, distributed data parallel\n")
@@ -177,6 +213,8 @@ for c in cards:
     if serve_rows(c, "partd"):
         W(f"**{c}**, vLLM rerun:\n")
         table(["Configuration", "Tokens/sec", "p50 latency (ms)", "p95 latency (ms)"], serve_rows(c, "partd"))
+        W("Same card type, same fp16 precision and same script as HW4, 4% to 7% slower. That size of gap is run to run "
+          "variation (host CPU load and GPU clocks), not a change in hardware or precision.\n")
 fig, ax = plt.subplots(figsize=(6, 4))
 for i, c in enumerate(cards):
     k = R[c].get("part_d_kv")
@@ -184,14 +222,21 @@ for i, c in enumerate(cards):
         continue
     ok = [r for r in k["rows"] if not r["oom"]]
     W(f"**{c}** KV cache at batch {k['batch']} (`{k['model']}`, {k['kv_bytes_per_token']} bytes per token, "
-      f"native max position {k['max_position']}). Longest context that fits: **{k['longest_ok']}**, "
-      f"shortest that fails: {k['shortest_fail']}.\n")
+      f"native max position {k['max_position']}). Longest context measured with HF prefill: **{k['longest_ok']}** "
+      f"(fails at {k['shortest_fail']}). The KV cache is only a small part of the peak: memory runs out on the attention "
+      f"scores, which grow with the square of the context.\n")
+    W("vLLM capacity at batch 8 is **calculated, not tested**: both vLLM runs used max_model_len 2048, and that engine "
+      "logged a KV pool of 9.9 GiB = 865,456 tokens on this T4. 865,456 / 8 = 108,182 tokens per sequence, so the KV "
+      f"pool alone would cover the model's native maximum of {k['max_position']} at batch 8. A run with max_model_len "
+      f"{k['max_position']} and 8 long prompts would be needed to confirm it.\n")
     table(["Context", "KV measured GB", "KV formula GB", "Peak GB"],
           [[r["context"], "OOM", "", ""] if r["oom"] else
            [r["context"], f"{r['kv_gb']:.3f}", f"{r['kv_formula_gb']:.3f}", f"{r['peak_gb']:.2f}"] for r in k["rows"]])
-    ax.plot([r["context"] for r in ok], [r["kv_gb"] for r in ok], "o-", c=COLORS[i % 3], lw=2, label=c)
+    ax.plot([r["context"] for r in ok], [r["kv_gb"] for r in ok], "o", c=COLORS[i % 3], ms=8, label=f"{c} measured")
+    xs = [0, max(r["context"] for r in ok)]
+    ax.plot(xs, [x * k["batch"] * k["kv_bytes_per_token"] / 1e9 for x in xs], "-", c=COLORS[1], lw=2,
+            label="formula, 12,288 bytes per token")
 ax.set(xlabel="context length (tokens)", ylabel="KV cache GB", title="KV cache memory at batch 8")
-ax.set_xscale("log", base=2)
 ax.legend()
 fig.tight_layout()
 fig.savefig(os.path.join(FIG, "part_d_kv.png"), dpi=120)
@@ -206,9 +251,12 @@ for c in cards:
     n = h["data"]["n_total"]
     samples = int(0.7 * n) * h["settings"]["epochs"]
     W(f"**{c}**: full fine tune = 70% of {n} tweets x {h['settings']['epochs']} epochs = {samples} training samples.\n")
-    table(["Configuration", "Samples/s", "Hours = samples / (samples/s x 3600)"],
-          [[r["technique"], f"{r['samples_per_s']:.1f}", f"{samples / r['samples_per_s'] / 3600:.3f} GPU hours"]
-           for r in b["rows"]])
+    one = int(0.7 * n)
+    table(["Configuration", "Samples/s", f"{h['settings']['epochs']} epochs, GPU hours", "1 epoch, GPU hours"],
+          [[r["technique"], f"{r['samples_per_s']:.1f}", f"{samples / r['samples_per_s'] / 3600:.3f}",
+            f"{one / r['samples_per_s'] / 3600:.3f}"] for r in b["rows"]])
+    W("GPU hours = samples / (samples per second x 3600). Validation loss stopped improving after epoch 1, so the "
+      "1 epoch column is the realistic cost.\n")
     rows = b["rows"]
     lo = min(rows, key=lambda r: r["peak_gb"])
     fast = max(rows, key=lambda r: r["samples_per_s"])

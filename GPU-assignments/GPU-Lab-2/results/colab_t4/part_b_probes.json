@@ -1,0 +1,248 @@
+{
+ "card": "colab_t4",
+ "gpu": {
+  "name": "Tesla T4",
+  "uuid": "GPU-72d7994b-bdfd-5779-ea43-fbfd70d47b68",
+  "vram_gb": 15.6,
+  "driver": "580.82.07",
+  "cuda": "13.0",
+  "torch": "2.11.0+cu130"
+ },
+ "smoke": false,
+ "source": "probe rows printed in hw45_colab_v3.ipynb (part_a.py and part_b.py)",
+ "probes": {
+  "Part A baseline": [
+   {
+    "batch": 1,
+    "samples_per_s": 14.662291836065505,
+    "peak_gb": 2.212928,
+    "epoch_s": 238.7075662612915,
+    "oom": false
+   },
+   {
+    "batch": 2,
+    "samples_per_s": 30.39698748117538,
+    "peak_gb": 2.215287296,
+    "epoch_s": 115.14298915863037,
+    "oom": false
+   },
+   {
+    "batch": 4,
+    "samples_per_s": 53.79875158488947,
+    "peak_gb": 2.218695168,
+    "epoch_s": 65.05727171897888,
+    "oom": false
+   },
+   {
+    "batch": 8,
+    "samples_per_s": 77.7902060808837,
+    "peak_gb": 2.218957312,
+    "epoch_s": 44.99281048774719,
+    "oom": false
+   },
+   {
+    "batch": 16,
+    "samples_per_s": 94.82062900020262,
+    "peak_gb": 2.239404544,
+    "epoch_s": 36.911799013614655,
+    "oom": false
+   },
+   {
+    "batch": 32,
+    "samples_per_s": 106.84397983446942,
+    "peak_gb": 2.656835584,
+    "epoch_s": 32.75804594159126,
+    "oom": false
+   },
+   {
+    "batch": 64,
+    "samples_per_s": 118.08318415789877,
+    "peak_gb": 3.99563776,
+    "epoch_s": 29.64012213051319,
+    "oom": false
+   },
+   {
+    "batch": 128,
+    "samples_per_s": 119.71343924284027,
+    "peak_gb": 6.531516928,
+    "epoch_s": 29.236483573913574,
+    "oom": false
+   },
+   {
+    "batch": 256,
+    "samples_per_s": 117.73049619261884,
+    "peak_gb": 11.708909056,
+    "epoch_s": 29.728915728628635,
+    "oom": false
+   },
+   {
+    "batch": 512,
+    "oom": true
+   }
+  ],
+  "Mixed precision": [
+   {
+    "batch": 32,
+    "samples_per_s": 261.5983222496823,
+    "peak_gb": 2.400720384,
+    "epoch_s": 13.3792906999588,
+    "oom": false
+   },
+   {
+    "batch": 64,
+    "samples_per_s": 321.80486144078566,
+    "peak_gb": 3.229566464,
+    "epoch_s": 10.876156389713287,
+    "oom": false
+   },
+   {
+    "batch": 128,
+    "samples_per_s": 369.94392589309535,
+    "peak_gb": 4.88379392,
+    "epoch_s": 9.460893273353577,
+    "oom": false
+   },
+   {
+    "batch": 256,
+    "samples_per_s": 394.7325690835966,
+    "peak_gb": 8.210074624,
+    "epoch_s": 8.866762649267912,
+    "oom": false
+   },
+   {
+    "batch": 512,
+    "samples_per_s": 401.0196355274245,
+    "peak_gb": 14.876529664,
+    "epoch_s": 8.72775218449533,
+    "oom": false
+   },
+   {
+    "batch": 1024,
+    "oom": true
+   }
+  ],
+  "Gradient checkpointing": [
+   {
+    "batch": 32,
+    "samples_per_s": 66.56610395815638,
+    "peak_gb": 2.220793344,
+    "epoch_s": 52.57931277155877,
+    "oom": false
+   },
+   {
+    "batch": 64,
+    "samples_per_s": 71.4764770138154,
+    "peak_gb": 2.239667712,
+    "epoch_s": 48.967158794403076,
+    "oom": false
+   },
+   {
+    "batch": 128,
+    "samples_per_s": 70.44158758670368,
+    "peak_gb": 2.23428096,
+    "epoch_s": 49.6865576133132,
+    "oom": false
+   },
+   {
+    "batch": 256,
+    "samples_per_s": 70.84765878953469,
+    "peak_gb": 3.049147392,
+    "epoch_s": 49.4017736054957,
+    "oom": false
+   },
+   {
+    "batch": 512,
+    "samples_per_s": 73.74011632834868,
+    "peak_gb": 4.734127104,
+    "epoch_s": 47.46398804709315,
+    "oom": false
+   },
+   {
+    "batch": 1024,
+    "samples_per_s": 73.84355878638668,
+    "peak_gb": 8.122604544,
+    "epoch_s": 47.397498949430876,
+    "oom": false
+   },
+   {
+    "batch": 2048,
+    "oom": true
+   }
+  ],
+  "8-bit optimiser": [
+   {
+    "batch": 32,
+    "samples_per_s": 92.35864662771692,
+    "peak_gb": 2.013415424,
+    "epoch_s": 37.895748019218445,
+    "oom": false
+   },
+   {
+    "batch": 64,
+    "samples_per_s": 97.85609573524076,
+    "peak_gb": 3.306824704,
+    "epoch_s": 35.766806080937386,
+    "oom": false
+   },
+   {
+    "batch": 128,
+    "samples_per_s": 98.1799052498866,
+    "peak_gb": 5.881931264,
+    "epoch_s": 35.648842714726925,
+    "oom": false
+   },
+   {
+    "batch": 256,
+    "samples_per_s": 97.36870830354516,
+    "peak_gb": 11.049445888,
+    "epoch_s": 35.945839900523424,
+    "oom": false
+   },
+   {
+    "batch": 512,
+    "oom": true
+   }
+  ],
+  "Best combination": [
+   {
+    "batch": 32,
+    "samples_per_s": 267.0589274642781,
+    "peak_gb": 1.741178368,
+    "epoch_s": 13.105721771717073,
+    "oom": false
+   },
+   {
+    "batch": 64,
+    "samples_per_s": 319.1544617702506,
+    "peak_gb": 2.573301248,
+    "epoch_s": 10.966476798057556,
+    "oom": false
+   },
+   {
+    "batch": 128,
+    "samples_per_s": 372.20136207150676,
+    "peak_gb": 4.227397632,
+    "epoch_s": 9.403512068092823,
+    "oom": false
+   },
+   {
+    "batch": 256,
+    "samples_per_s": 406.73890682446984,
+    "peak_gb": 7.552975872,
+    "epoch_s": 8.60502878203988,
+    "oom": false
+   },
+   {
+    "batch": 512,
+    "samples_per_s": 405.4185642980049,
+    "peak_gb": 14.217595904,
+    "epoch_s": 8.633053116500378,
+    "oom": false
+   },
+   {
+    "batch": 1024,
+    "oom": true
+   }
+  ]
+ }
+}

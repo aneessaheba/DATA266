@@ -98,9 +98,10 @@ difference.
 (2 for K and V, 24 layers, 2 KV heads, 64 dims, 2 bytes) and grows linearly: 0.10 GB per 1024 tokens at batch 8.
 
 **Longest context at batch 8.** Measured with HF prefill: **3328 tokens** fit and 3584 fails. The KV cache at 3328 is only
-0.33 GB of the 13.2 GB peak. The limit is the attention scores, which grow with the square of the context. As a check by
-calculation, fp32 scores for 8 sequences x 14 heads at 4096 tokens need 8 x 14 x 4096 x 4096 x 4 bytes = 7.52 GB on top
-of everything else, which cannot fit.
+0.33 GB of the 13.2 GB peak. The limit is the attention scores, which grow with the square of the context. The v2 notebook
+log shows it directly: at 4096 tokens the allocator reports "memory allocation failed with OOM ... trying to allocate
+7516192768 bytes" (04:35:16 UTC). That is 7.52 GB, exactly the fp32 attention scores for 8 sequences x 14 heads:
+8 x 14 x 4096 x 4096 x 4 bytes = 7,516,192,768 bytes.
 
 vLLM was not tested at long context: both vLLM runs used max_model_len 2048. By calculation only, that engine's KV pool
 was 9.9 GiB = 865,456 tokens on this T4 (from its startup log), so 865,456 / 8 = 108,182 tokens per sequence would fit,
@@ -113,7 +114,7 @@ need a run with max_model_len 32,768 and 8 long prompts.
 
 | Configuration | Samples/s | 4 epochs | 1 epoch |
 |---|---|---|---|
-| Baseline, batch 32 | 91.9 | 127,720 / 91.9 / 3600 = 0.39 h | 31,930 / 91.9 / 3600 = 0.097 h |
+| Baseline, batch 32 | 91.9 | 127,720 / 91.9 / 3600 = 0.39 h | 31,930 / 91.9 / 3600 = 0.096 h |
 | Mixed precision + 8 bit, batch 32 | 263.8 | 127,720 / 263.8 / 3600 = 0.13 h | 31,930 / 263.8 / 3600 = 0.034 h |
 
 **Configuration I would use.** Mixed precision plus the 8 bit AdamW optimiser at batch 32, for 1 epoch, so about

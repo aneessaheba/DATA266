@@ -1,0 +1,7 @@
+vllm
+transformers
+datasets
+scikit-learn
+pandas
+matplotlib
+bitsandbytes

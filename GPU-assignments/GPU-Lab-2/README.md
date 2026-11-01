@@ -18,7 +18,6 @@ HW4.a and HW4.5 use the same dataset, row range and split.
 | scripts/serve.py | HF pipeline baseline and vLLM at batch 1, 8, 32 (HW4.a and Part D) |
 | scripts/part_a.py | Part A batch doubling until OOM |
 | scripts/part_b.py | Part B AMP, checkpointing, accumulation, 8 bit optimiser, best combination |
-| scripts/part_c_ddp.py | Part C DDP throughput, comm overhead, all reduce bandwidth |
 | scripts/part_d_kv.py | Part D KV cache memory against context length, longest context at batch 8 |
 | scripts/report.py | builds METRICS.md and figures/ from results/ |
 | run_all.sh | runs everything on one card |
@@ -49,8 +48,7 @@ Colab (Runtime, change runtime type, T4 GPU). Upload `GPU_Lab_2.zip`, then:
 If vLLM fails to start on the T4, run `!pip install -q vllm==0.9.2` and repeat only the serving stages with
 `!CARD=colab_t4 STAGES="serve d" bash run_all.sh`.
 
-Part C is optional per the TA and is skipped by default; METRICS.md then states "Part C skipped (optional)".
-To run it on a two GPU box such as Kaggle 2 x T4: `CARD=kaggle_t4x2 STAGES="prov c" bash run_all.sh`.
+Part C is optional per the TA and was skipped; METRICS.md states "Part C skipped (optional)".
 The GPU used is recorded in `provenance/nvidia-smi-L_<card>.txt`.
 
 Chain check without a GPU: `SMOKE=1 CARD=mac bash run_all.sh`, then delete `results/mac`, `RUN_LOG.txt`,
@@ -59,7 +57,6 @@ Chain check without a GPU: `SMOKE=1 CARD=mac bash run_all.sh`, then delete `resu
 ## Notebooks actually used
 
 `hw45_colab_v2.ipynb` produced HW4.a, serving and Part D. `hw45_colab_v3.ipynb` reran Parts A and B after the eval mode fix.
-`hw45_colab.ipynb` is the first attempt, which stopped at vLLM startup.
 
 ## After the runs
 

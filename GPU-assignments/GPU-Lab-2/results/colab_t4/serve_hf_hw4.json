@@ -1,0 +1,26 @@
+{
+ "card": "colab_t4",
+ "gpu": {
+  "name": "Tesla T4",
+  "uuid": "GPU-e98b1f84-8d7b-50bb-a5c6-96b3440c7e56",
+  "vram_gb": 15.6,
+  "driver": "580.82.07",
+  "cuda": "13.0",
+  "torch": "2.13.0+cu130"
+ },
+ "smoke": false,
+ "model": "Qwen/Qwen2.5-0.5B-Instruct",
+ "dtype": "float16",
+ "new_tokens": 128,
+ "prompt": "Explain why the sky is blue to a ten year old.",
+ "sample_output": "To a ten-year-old, the sky being blue can be explained in several simple ways:\n\n1. **Light Reflection**: When sunlight hits the Earth's atmosphere, it bounces off particles like dust and water droplets. These particles scatter the light into different colors.\n\n2. **Color Mixing**: The scattering of light causes the colors of the sun to mix together. Blue light is scattered more than other colors because it has shorter wavelengths (blue light has a wavelength of about 480 nanometers).\n\n3. **Refraction**: As the light travels through the air, it bends around objects and changes direction. This bending occurs at the",
+ "rows": [
+  {
+   "batch": 1,
+   "requests": 16,
+   "tokens_per_s": 25.057082794112134,
+   "p50_ms": 5009.393692016602,
+   "p95_ms": 5657.65506029129
+  }
+ ]
+}

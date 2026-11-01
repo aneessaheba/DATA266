@@ -1,0 +1,149 @@
+{
+ "card": "colab_t4",
+ "gpu": {
+  "name": "Tesla T4",
+  "uuid": "GPU-e98b1f84-8d7b-50bb-a5c6-96b3440c7e56",
+  "vram_gb": 15.6,
+  "driver": "580.82.07",
+  "cuda": "13.0",
+  "torch": "2.13.0+cu130"
+ },
+ "smoke": false,
+ "data": {
+  "dataset": "cardiffnlp/tweet_eval (sentiment, train split)",
+  "rows": "330 to 5329",
+  "n_rows": 5000,
+  "n_total": 45615,
+  "n_train": 3500,
+  "n_val": 750,
+  "n_test": 750,
+  "classes": [
+   "negative",
+   "neutral",
+   "positive"
+  ]
+ },
+ "settings": {
+  "model": "bert-base-uncased",
+  "max_len": 64,
+  "batch": 32,
+  "lr": 2e-05,
+  "epochs": 4,
+  "seed": 5330
+ },
+ "epochs": [
+  {
+   "epoch": 1,
+   "train_loss": 0.9000637168234045,
+   "val_loss": 0.7181633512179056,
+   "val_acc": 0.6733333333333333,
+   "epoch_s": 37.426429271698
+  },
+  {
+   "epoch": 2,
+   "train_loss": 0.6037217031825672,
+   "val_loss": 0.7301367223262787,
+   "val_acc": 0.6653333333333333,
+   "epoch_s": 38.52630162239075
+  },
+  {
+   "epoch": 3,
+   "train_loss": 0.3806012473323128,
+   "val_loss": 0.8584002951780955,
+   "val_acc": 0.688,
+   "epoch_s": 40.61864638328552
+  },
+  {
+   "epoch": 4,
+   "train_loss": 0.20007422522387722,
+   "val_loss": 0.9801906049251556,
+   "val_acc": 0.676,
+   "epoch_s": 43.60699796676636
+  }
+ ],
+ "train_s": 160.17860889434814,
+ "peak_gb": 2.653165568,
+ "test_acc": 0.6586666666666666,
+ "confusion": [
+  [
+   72,
+   32,
+   12
+  ],
+  [
+   32,
+   231,
+   80
+  ],
+  [
+   11,
+   89,
+   191
+  ]
+ ],
+ "per_class": [
+  {
+   "cls": "negative",
+   "precision": 0.6260869565217392,
+   "recall": 0.6206896551724138,
+   "f1": 0.6233766233766234,
+   "n": 116
+  },
+  {
+   "cls": "neutral",
+   "precision": 0.65625,
+   "recall": 0.673469387755102,
+   "f1": 0.6647482014388489,
+   "n": 343
+  },
+  {
+   "cls": "positive",
+   "precision": 0.6749116607773852,
+   "recall": 0.6563573883161512,
+   "f1": 0.6655052264808362,
+   "n": 291
+  }
+ ],
+ "worst_class": "negative",
+ "misclassified": [
+  {
+   "text": "@user She\\u2019s invited. And Ash may not go because of her. And I want Ash to be there because his AE helped mine through some stuff..",
+   "true": "negative",
+   "pred": "neutral"
+  },
+  {
+   "text": "You may remember Frank Gifford as a great football player or broadcaster. But I remember him as the guy who wanted anal from a stewardess",
+   "true": "negative",
+   "pred": "neutral"
+  },
+  {
+   "text": "\"It's simple, we want to be like Israel, a white Israel.  If that's a bad thing, so is current Israel.",
+   "true": "negative",
+   "pred": "neutral"
+  },
+  {
+   "text": "Please pull down Tom Brady's pants and undress the cheaters on Thursday night @user",
+   "true": "negative",
+   "pred": "neutral"
+  },
+  {
+   "text": "\"Kane may have made it 5-0, I may have lost my bet. But guess what, I can speak properly, Harry Kane can't.\"",
+   "true": "negative",
+   "pred": "neutral"
+  }
+ ],
+ "custom": [
+  {
+   "text": "I love how fast this new phone charges!",
+   "pred": "positive"
+  },
+  {
+   "text": "Traffic again. Worst commute ever.",
+   "pred": "negative"
+  },
+  {
+   "text": "The meeting is moved to 3pm on Thursday.",
+   "pred": "neutral"
+  }
+ ]
+}

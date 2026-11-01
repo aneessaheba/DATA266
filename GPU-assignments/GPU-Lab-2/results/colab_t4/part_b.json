@@ -1,0 +1,81 @@
+{
+ "card": "colab_t4",
+ "gpu": {
+  "name": "Tesla T4",
+  "uuid": "GPU-72d7994b-bdfd-5779-ea43-fbfd70d47b68",
+  "vram_gb": 15.6,
+  "driver": "580.82.07",
+  "cuda": "13.0",
+  "torch": "2.11.0+cu130"
+ },
+ "smoke": false,
+ "amp_dtype": "torch.float16",
+ "rows": [
+  {
+   "technique": "Baseline (HW4 settings)",
+   "optimizer": "AdamW",
+   "max_batch": 256,
+   "effective_batch": 32,
+   "opt_steps": 436,
+   "wall_s": 151.75129175186157,
+   "samples_per_s": 91.93990930115986,
+   "peak_gb": 2.654214144,
+   "test_acc": 0.648
+  },
+  {
+   "technique": "Mixed precision",
+   "optimizer": "AdamW",
+   "max_batch": 512,
+   "effective_batch": 32,
+   "opt_steps": 436,
+   "wall_s": 53.47138738632202,
+   "samples_per_s": 260.92459316978415,
+   "peak_gb": 2.402948608,
+   "test_acc": 0.648
+  },
+  {
+   "technique": "Gradient checkpointing",
+   "optimizer": "AdamW",
+   "max_batch": 1024,
+   "effective_batch": 32,
+   "opt_steps": 436,
+   "wall_s": 211.15377521514893,
+   "samples_per_s": 66.0750677357486,
+   "peak_gb": 2.22079232,
+   "test_acc": 0.648
+  },
+  {
+   "technique": "Gradient accumulation",
+   "optimizer": "AdamW",
+   "max_batch": 256,
+   "effective_batch": 128,
+   "opt_steps": 436,
+   "wall_s": 619.7047667503357,
+   "samples_per_s": 90.05578622970914,
+   "peak_gb": 2.473803776,
+   "test_acc": 0.6333333333333333
+  },
+  {
+   "technique": "8-bit optimiser",
+   "optimizer": "AdamW8bit",
+   "max_batch": 256,
+   "effective_batch": 32,
+   "opt_steps": 436,
+   "wall_s": 155.31535387039185,
+   "samples_per_s": 89.83014011378887,
+   "peak_gb": 2.013415424,
+   "test_acc": 0.6573333333333333
+  },
+  {
+   "technique": "Best combination",
+   "optimizer": "AdamW8bit",
+   "max_batch": 512,
+   "effective_batch": 32,
+   "opt_steps": 436,
+   "wall_s": 52.89715933799744,
+   "samples_per_s": 263.75707456899124,
+   "peak_gb": 1.741178368,
+   "test_acc": 0.652
+  }
+ ]
+}

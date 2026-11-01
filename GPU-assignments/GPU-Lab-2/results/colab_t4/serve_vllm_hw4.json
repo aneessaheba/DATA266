@@ -1,0 +1,40 @@
+{
+ "card": "colab_t4",
+ "gpu": {
+  "name": "Tesla T4",
+  "uuid": "GPU-e98b1f84-8d7b-50bb-a5c6-96b3440c7e56",
+  "vram_gb": 15.6,
+  "driver": "580.82.07",
+  "cuda": "13.0",
+  "torch": "2.13.0+cu130"
+ },
+ "smoke": false,
+ "model": "Qwen/Qwen2.5-0.5B-Instruct",
+ "dtype": "float16",
+ "new_tokens": 128,
+ "prompt": "Explain why the sky is blue to a ten year old.",
+ "sample_output": "To a ten-year-old, the sky being blue is a fascinating and awe-inspiring phenomenon. Here are some reasons why the sky appears blue to a child:\n\n1. **Color Mixing**: The sky is made up of various colors, including blue, green, and white. When light passes through the atmosphere, it is refracted and scattered, causing the colors to mix and blend together. The blue light from the sun is the most dominant color, and it is scattered more than the other colors.\n\n2. **Refraction**: As light travels through the atmosphere, it bends around the edges of the Earth. This bending of light causes the",
+ "rows": [
+  {
+   "batch": 1,
+   "requests": 16,
+   "tokens_per_s": 172.00312443351422,
+   "p50_ms": 742.9542541503906,
+   "p95_ms": 752.2082328796387
+  },
+  {
+   "batch": 8,
+   "requests": 32,
+   "tokens_per_s": 1246.687901933825,
+   "p50_ms": 820.7533359527588,
+   "p95_ms": 826.451301574707
+  },
+  {
+   "batch": 32,
+   "requests": 128,
+   "tokens_per_s": 3552.843008794956,
+   "p50_ms": 1152.8297662734985,
+   "p95_ms": 1153.6786556243896
+  }
+ ]
+}

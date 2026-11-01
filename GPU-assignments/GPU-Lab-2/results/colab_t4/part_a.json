@@ -1,0 +1,96 @@
+{
+ "card": "colab_t4",
+ "gpu": {
+  "name": "Tesla T4",
+  "uuid": "GPU-72d7994b-bdfd-5779-ea43-fbfd70d47b68",
+  "vram_gb": 15.6,
+  "driver": "580.82.07",
+  "cuda": "13.0",
+  "torch": "2.11.0+cu130"
+ },
+ "smoke": false,
+ "data": {
+  "dataset": "cardiffnlp/tweet_eval (sentiment, train split)",
+  "rows": "330 to 5329",
+  "n_rows": 5000,
+  "n_total": 45615,
+  "n_train": 3500,
+  "n_val": 750,
+  "n_test": 750,
+  "classes": [
+   "negative",
+   "neutral",
+   "positive"
+  ]
+ },
+ "max_batch": 256,
+ "rows": [
+  {
+   "batch": 1,
+   "samples_per_s": 14.662291836065505,
+   "peak_gb": 2.212928,
+   "epoch_s": 238.7075662612915,
+   "oom": false
+  },
+  {
+   "batch": 2,
+   "samples_per_s": 30.39698748117538,
+   "peak_gb": 2.215287296,
+   "epoch_s": 115.14298915863037,
+   "oom": false
+  },
+  {
+   "batch": 4,
+   "samples_per_s": 53.79875158488947,
+   "peak_gb": 2.218695168,
+   "epoch_s": 65.05727171897888,
+   "oom": false
+  },
+  {
+   "batch": 8,
+   "samples_per_s": 77.7902060808837,
+   "peak_gb": 2.218957312,
+   "epoch_s": 44.99281048774719,
+   "oom": false
+  },
+  {
+   "batch": 16,
+   "samples_per_s": 94.82062900020262,
+   "peak_gb": 2.239404544,
+   "epoch_s": 36.911799013614655,
+   "oom": false
+  },
+  {
+   "batch": 32,
+   "samples_per_s": 106.84397983446942,
+   "peak_gb": 2.656835584,
+   "epoch_s": 32.75804594159126,
+   "oom": false
+  },
+  {
+   "batch": 64,
+   "samples_per_s": 118.08318415789877,
+   "peak_gb": 3.99563776,
+   "epoch_s": 29.64012213051319,
+   "oom": false
+  },
+  {
+   "batch": 128,
+   "samples_per_s": 119.71343924284027,
+   "peak_gb": 6.531516928,
+   "epoch_s": 29.236483573913574,
+   "oom": false
+  },
+  {
+   "batch": 256,
+   "samples_per_s": 117.73049619261884,
+   "peak_gb": 11.708909056,
+   "epoch_s": 29.728915728628635,
+   "oom": false
+  },
+  {
+   "batch": 512,
+   "oom": true
+  }
+ ]
+}

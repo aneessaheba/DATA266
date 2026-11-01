@@ -1,0 +1,63 @@
+{
+ "card": "colab_t4",
+ "gpu": {
+  "name": "Tesla T4",
+  "uuid": "GPU-e98b1f84-8d7b-50bb-a5c6-96b3440c7e56",
+  "vram_gb": 15.6,
+  "driver": "580.82.07",
+  "cuda": "13.0",
+  "torch": "2.13.0+cu130"
+ },
+ "smoke": false,
+ "model": "Qwen/Qwen2.5-0.5B-Instruct",
+ "batch": 8,
+ "kv_bytes_per_token": 12288,
+ "max_position": 32768,
+ "longest_ok": 3328,
+ "shortest_fail": 3584,
+ "rows": [
+  {
+   "context": 512,
+   "kv_gb": 0.058851328,
+   "kv_formula_gb": 0.050331648,
+   "peak_gb": 1.41296384,
+   "oom": false
+  },
+  {
+   "context": 1024,
+   "kv_gb": 0.102629376,
+   "kv_formula_gb": 0.100663296,
+   "peak_gb": 2.35363072,
+   "oom": false
+  },
+  {
+   "context": 2048,
+   "kv_gb": 0.202244096,
+   "kv_formula_gb": 0.201326592,
+   "peak_gb": 5.821722112,
+   "oom": false
+  },
+  {
+   "context": 3072,
+   "kv_gb": 0.303038464,
+   "kv_formula_gb": 0.301989888,
+   "peak_gb": 11.413310976,
+   "oom": false
+  },
+  {
+   "context": 3328,
+   "kv_gb": 0.33292288,
+   "kv_formula_gb": 0.327155712,
+   "peak_gb": 13.152224768,
+   "oom": false
+  },
+  {
+   "context": 3584,
+   "oom": true
+  },
+  {
+   "context": 4096,
+   "oom": true
+  }
+ ]
+}
